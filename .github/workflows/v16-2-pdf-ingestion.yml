@@ -1,0 +1,22 @@
+name: V16.2 Offline Notice PDF Ingestion
+on:
+  push:
+    branches: [feat-v16-2-offline-notice-pdf-ingestion]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  offline-pdf-ingestion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned offline PDF testing libraries
+        run: python -m pip install pypdf==5.9.0 reportlab==4.4.9
+      - name: Validate synthetic PDF parsing and source boundaries
+        run: python -m unittest discover -s tests -p v16_2_pdf_ingest_test.py -v
+      - name: Validate existing public release security
+        run: node tests/v16_release_security_gate.test.mjs
