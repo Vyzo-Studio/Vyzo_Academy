@@ -2,6 +2,7 @@ import {generateSchedule,verifySchedule,WEEKDAYS,validMinutes} from './scheduler
 import {evaluateDiagnostic,selectDiagnosticQuestions} from './diagnostics.mjs';
 import {getWritingProposal,WRITING_PROPOSALS,newEssayRecord,essayMetrics,formatWritingTimer,essayVersionSnapshot} from './essay-lab.mjs';
 import {renderWritingCatalog,renderWritingEditor,refreshWritingCounters} from './essay-lab-ui.mjs';
+import {eligibleEssay,submitSavedEssay} from './essay-assessment-client.mjs';
 
 /* VYZO ACADEMY — V8.0.1: cliente cloud. Não contém credenciais privilegiadas. */
 const $=s=>document.querySelector(s);
@@ -20,7 +21,7 @@ const week=(dt)=>{const d=new Date(dt);d.setHours(12,0,0,0);return d;};
 const fmtClock=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 const safeExternalUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null}catch{return null}};
 const configReady=()=>/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(String(cfg.url||'')) && (/^sb_publishable_/.test(String(cfg.publishableKey||''))||/^eyJ/.test(String(cfg.publishableKey||'')));
-const data={client:null,user:null,profile:null,goals:[],diagnostics:[],tasks:[],essays:[],page:'home',activeGoalId:null,activeDiagnostic:null,questionPosition:0,authTab:'signup',onboard:1,selectedTypes:[],calendarView:'week',calendarOffset:0,calendarFilter:'all',recovery:false,busy:false,essayTimer:null,essayPending:null,essaySaving:null,essayClockAt:null,essayClockBase:0,essayTicker:null,essayRunning:false,essayCategory:'enem',essayMode:'treino',essayFocus:false,lastSync:null};
+const data={client:null,user:null,profile:null,goals:[],diagnostics:[],tasks:[],essays:[],page:'home',activeGoalId:null,activeDiagnostic:null,questionPosition:0,authTab:'signup',onboard:1,selectedTypes:[],calendarView:'week',calendarOffset:0,calendarFilter:'all',recovery:false,busy:false,essayTimer:null,essayPending:null,essaySaving:null,essayClockAt:null,essayClockBase:0,essayTicker:null,essayRunning:false,essayCategory:'enem',essayMode:'treino',essayFocus:false,essayAssessing:false,lastSync:null};
 function say(message,type='info'){
  const el=$('#toast');el.textContent=message;el.dataset.type=type;
 }
@@ -416,7 +417,7 @@ function renderEssayEditor(e){
  data.essayFocus=false;document.body.classList.remove('essay-focus-mode');
  main(head('Editor de redação','Leia a proposta, escreva e acompanhe o estado de salvamento. Seus textos não são enviados para IA nesta etapa.')+
   '<div id="essay-lab-root"></div>');
- renderWritingEditor($('#essay-lab-root'),e);
+ renderWritingEditor($('#essay-lab-root'),e,{canAssess:eligibleEssay(data.user,e)});
  restoreUnsavedEssay(e);
 }
 function queueEssayDraft(){
@@ -565,6 +566,36 @@ document.addEventListener('click',async ev=>{
     document.body.classList.toggle('essay-focus-mode',data.essayFocus);
     action.textContent=data.essayFocus?'Sair do modo foco':'Foco na escrita';
     $('#essay-body')?.focus();break;
+   }
+   case 'essay-assess':{
+    if(data.essayAssessing)break;
+    const original=data.activeEssay,owner=data.user?.id;
+    if(!original||!owner||!eligibleEssay(data.user,original))
+     throw Error('Esta conta ou proposta ainda não está autorizada para correção.');
+    data.essayAssessing=true;
+    action.disabled=true;
+    const announce=text=>{const el=$('#essay-assess-status');if(el)el.textContent=text;};
+    try{
+     announce('Salvando a redação e confirmando sua versão...');
+     stopEssayTimer();queueEssayDraft();await saveEssayDraft();
+     if(data.user?.id!==owner)throw Error('A conta ativa foi alterada durante a solicitação.');
+     const current=data.essays.find(e=>e.id===original.id);
+     if(!current||!eligibleEssay(data.user,current))throw Error('Redação não encontrada nesta conta.');
+     announce('Enviando a versão salva para avaliação autorizada...');
+     const result=await submitSavedEssay({client:data.client,user:data.user,essay:current});
+     // O relatório pertence à revisão congelada no servidor; nunca atualizar texto ou versões.
+     if(data.user?.id===owner&&data.activeEssay?.id===current.id){
+      announce('Correção concluída e armazenada com segurança para esta versão. Visualização detalhada pendente da Etapa B3.');
+      say('Avaliação estimada registrada; sua redação original foi preservada.');
+     }
+    }catch(e){
+     announce('Correção não concluída. O texto permanece salvo e você pode tentar novamente.');
+     notifyError(e,'Correção da redação');
+    }finally{
+     data.essayAssessing=false;
+     if(document.contains(action))action.disabled=false;
+    }
+    break;
    }
    case 'essay-save-now':{stopEssayTimer();queueEssayDraft();await saveEssayDraft();break;}
    case 'essay-export':{
