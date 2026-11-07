@@ -21,7 +21,7 @@ A branch main também passou em [CI após #17](https://github.com/Vyzo-Studio/Vy
 | Redação A | [#12](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/12) | catálogo, editor, versões e salvamento | Auth real e homologação |
 | Redação B1 | [#13](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/13) | contrato ENEM, gateway, migração privada, mock e SQL rollback | provedor, permissão, gasto, migração e implantação |
 | Redação B2 | [#16](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/16) | botão/solicitação de revisão salva, cliente auth-gated, retry e deduplicação | depende #13/#12/#8; CI mock aprovado, não deployado |
-| Redação B3 | [#18](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/18) | leitura RLS persistida e relatório DOM seguro, sem notas simuladas no produto | depende #16 e Auth real; testes executando na criação deste relatório |
+| Redação B3 | [#18](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/18) | leitura RLS persistida e relatório DOM seguro, sem notas simuladas no produto | [CI mock PASS](https://github.com/Vyzo-Studio/Vyzo_Academy/actions/runs/42408762873); depende #16 e Auth real |
 | Pesquisa oficial com IA | [#10](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/10) | Edge Function segura, JWT, quota, citações | Auth, secrets, aprovação de orçamento, teste E2E |
 | Auth e sincronização | [#8](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/8) | login, recuperação, cloud, importação com controles em branch | consentimento, idade, emails reais, 2 sessões reais e QA |
 
