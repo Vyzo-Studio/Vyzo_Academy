@@ -3,6 +3,7 @@ import {EXAM_TYPES,AREAS,WEEKDAYS,isEnem,suitableQuestions,sampleDiagnostic,anal
 import {searchExams,cloudConfigured,validQuery} from './v10-research.mjs';
 import {composeExam} from './v11-composer.mjs';
 import {renderFigure} from './v11-visual.mjs';
+import {officialPaperHtml} from './v15-official-papers.mjs';
 import {EDUCATION_STAGES,LEARNING_PATHS,getLearningPath,getSchoolStage,schoolYears,schoolSubjects,validSchoolYear,validateSchoolSubjectSelection,schoolGradeLabel,ENEM_OFFICIAL_ARCHIVE,searchVerifiedExam} from './v15-pathways.mjs';
 const KEY='vyzo-academy-v9-guest-1';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -425,7 +426,8 @@ function renderPastPapers(){
   archive.years.map(y=>'<option value="'+y+'">'+y+'</option>').join('')+
   '</select></div><p id="v15-past-selection" class="v9-mini">Edição selecionada: '+archive.years[0]+'. Localize esse ano na página oficial.</p>'+
   '<div class="v9-actions"><a class="btn" href="'+h(archive.url)+'" target="_blank" rel="noopener noreferrer">Abrir provas e gabaritos oficiais no Inep</a></div>'+
-  '<p class="v9-mini">O link leva ao índice oficial de anos; não é um PDF direto nem um simulado já importado. Outros exames serão adicionados apenas com fontes verificadas.</p>'+
+  '<p class="v9-mini">O índice oficial reúne todas as edições. Os links diretos abaixo só aparecem quando catalogados e conferidos no índice; a disponibilidade dos PDFs depende do Inep e o conteúdo não foi convertido em simulado.</p>'+
+  '<div id="v15-past-direct" aria-live="polite">'+officialPaperHtml(archive.years[0],h)+'</div>'+
   '</div>');
 }
 function renderLibrary(){
@@ -571,7 +573,7 @@ document.addEventListener('change',e=>{const el=e.target;
   if(research)research.hidden=school;
   if(manual)manual.hidden=school;
  }
- if(el.id==='v15-past-year'){const display=$('#v15-past-selection');if(display)display.textContent='Edição selecionada: '+el.value+'. Localize esse ano na página oficial.';}
+ if(el.id==='v15-past-year'){const display=$('#v15-past-selection'),direct=$('#v15-past-direct');if(display)display.textContent='Edição selecionada: '+el.value+'. Consulte os documentos listados abaixo ou abra o índice do Inep.';if(direct)direct.innerHTML=officialPaperHtml(el.value,h);}
  if(el.id.startsWith('v15-school-stage-')){
   const index=el.id.slice('v15-school-stage-'.length),target=$('#v15-school-year-'+index);
   if(target)target.innerHTML=schoolYears(el.value).map(y=>'<option value="'+y+'">'+y+'º ano</option>').join('');
