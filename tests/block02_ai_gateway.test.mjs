@@ -61,16 +61,21 @@ const req=(body={query:'ENEM 2025'},header={},origin='https://vyzo-studio.github
  method:'POST',headers:{Origin:origin,Authorization:'Bearer '+token,'Content-Type':'application/json',...header},body:JSON.stringify(body)
  });
 const calls=[];
-let quotaError=false,providerError=false,confirmUser=true,adminUser=true,searchUsed=0,selectedStatus='';
+let quotaError=false,providerError=false,confirmUser=true,adminUser=true,adultApproved=true,searchUsed=0,selectedStatus='';
 globalThis.fetch=async (input,init={})=>{
  const u=String(input);calls.push({url:u,init});
  const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json'}});
  if(u.endsWith('/auth/v1/user'))return json({
   id:'11111111-1111-4111-8111-111111111111',email_confirmed_at:confirmUser?'2026-11-07':null,is_anonymous:false,
-  app_metadata:{academy_ai_research_allowed:adminUser}
+  app_metadata:{academy_ai_research_allowed:adminUser,academy_adult_verified:adultApproved}
  });
- if(u.includes('/rpc/academy_reserve_research'))
+ if(u.includes('/rpc/academy_reserve_research_for_student')){
+  assert.equal(init.headers.apikey,env.SUPABASE_SERVICE_ROLE_KEY);
+  assert.equal(init.headers.Authorization,'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY);
+  const body=JSON.parse(init.body);
+  assert.equal(body.p_user_id,'11111111-1111-4111-8111-111111111111');
   return quotaError?json({code:'P0001'},400):json(id);
+ }
  if(u==='https://api.openai.com/v1/responses'){
   searchUsed++;
   const payload=JSON.parse(init.body);
@@ -102,7 +107,9 @@ try{
  result=await handleResearchRequest(req());assert.equal(result.status,403);
  confirmUser=true;adminUser=false;
  result=await handleResearchRequest(req());assert.equal(result.status,403);
- adminUser=true;env.ACADEMY_AI_ENABLED='true';
+ adminUser=true;adultApproved=false;
+ result=await handleResearchRequest(req());assert.equal(result.status,403);
+ adultApproved=true;env.ACADEMY_AI_ENABLED='true';
  quotaError=true;
  result=await handleResearchRequest(req());assert.equal(result.status,429);
  assert.equal(searchUsed,0,'Quota check precedes paid provider');
