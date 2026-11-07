@@ -1,7 +1,7 @@
 import {generateSchedule,verifySchedule,WEEKDAYS,validMinutes} from './scheduler.mjs';
 import {evaluateDiagnostic,selectDiagnosticQuestions} from './diagnostics.mjs';
 import {scanLegacySources,importForAccount,listHistory,readSnapshot,readHistoryArchive,downloadSnapshot} from './cloud-snapshot.mjs';
-import {getVerifiedStudent} from './v12-auth-core.mjs';
+import {getVerifiedStudent,isVerifiedStudent} from './v12-auth-core.mjs';
 import {mountAccountImport} from './account-import.mjs';
 
 /* VYZO ACADEMY — V8.0.1: cliente cloud. Não contém credenciais privilegiadas. */
@@ -92,6 +92,11 @@ async function bootstrap(){
  if(data.user&&data.user.id!==result.user.id){erasePrivateState();generation=authGeneration;}
  data.user=result.user;
  if(!data.user.email_confirmed_at||data.user.is_anonymous){setStatus('Verifique seu e-mail');renderUnverified();return;}
+ if(!isVerifiedStudent(data.user)){
+  erasePrivateState();
+  disableUI('Acesso privado indisponível: conta adulta ainda não homologada pela VYZO ACADEMY.');
+  return;
+ }
  const identity=data.user.id;
  setStatus('Sincronizando...');
  await loadData(identity);
