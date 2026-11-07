@@ -19,6 +19,8 @@ jobs:
         run: node tests/qa.mjs
       - name: Check HTML bundle
         run: python3 scripts/build.py --check
+      - name: V16 public release security gate
+        run: node tests/v16_release_security_gate.test.mjs
       - name: V16 pedagogical arithmetic and bundle evidence
         run: node tests/v16_quantitative_bank.test.mjs
       - name: V16 expanded quantitative content checks
