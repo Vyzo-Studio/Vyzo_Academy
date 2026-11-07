@@ -61,7 +61,7 @@ const cloud=read('academy/v9-cloud-gate.mjs');
 const gate=read('supabase/migrations/202611070003_stage03_registration_gate.sql');
 for(const token of ['signUp(','signInWithPassword(','resetPasswordForEmail(','updateUser(','signOut(','persistSession:true'])assert(app.includes(token),'Missing Auth flow: '+token);
 assert(app.includes('erasePrivateState()')&&app.includes('mountAccountImport'),'Account isolation and import UI');
-assert(config.includes('registrationEnabled: false'));
+assert.match(config,/registrationEnabled:\s*false/);
 assert.match(config,/url:\s*''/);
 assert.match(config,/publishableKey:\s*''/);
 assert.match(config,/registrationEnabled:false/);
