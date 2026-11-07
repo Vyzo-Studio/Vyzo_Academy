@@ -167,6 +167,14 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `tests/v10_research.test.mjs`: casos de fronteira para consulta longa, normalização de espaços e entradas não confiáveis.
 - Sem chamada paga, sem alteração dos perfis públicos ou do banco; o backend V10 segue bloqueado até a homologação da autenticação e da IA.
 
+## V16.2 — Lote D1: extração local de editais PDF (Módulos 13, 16, 24)
+
+- `scripts/ingest_exam_pdf.py` cria JSON com texto extraído por página, contagem de páginas, SHA-256 do PDF e URL institucional **informada**, sem fazer rede, OCR, pesquisa paga nem interpretar requisitos. Limites: 12 MiB, 100 páginas, 12 mil caracteres por página, 250 mil no total; PDF protegido, malformado ou sem cabeçalho é rejeitado.
+- A origem permitida é apenas um padrão HTTPS de domínio institucional, **não comprovação** de autenticidade do edital ou de correspondência com o arquivo. Os resultados permanecem como `extraido_sem_revisao`, `origem_confirmada:false` e `conteudo_oficial_homologado:false`; páginas digitalizadas são sinalizadas sem inventar OCR.
+- Uso offline de operador: `python scripts/ingest_exam_pdf.py edital.pdf --origem https://www.gov.br/... --saida extraido.json`. Não sobrescreve JSON existente. O conteúdo pode conter dados pessoais; não subir PDFs ou extrações ao GitHub.
+- `tests/v16_2_pdf_ingest_test.py` usa documentos **sintéticos gerados localmente**, verifica extração, hash, PDF sem texto, arquivo inválido, spoofing de domínio/URL, porta inválida e não sobrescrita. Pipeline instala `pypdf==5.9.0` e `reportlab==4.4.9` para teste.
+- É **fundação independente de processamento**, não leitor automático validado por edital, não prova histórica convertida e não nova UI escolar; revisão humana e integração com o modelo de fontes ainda são necessárias.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
