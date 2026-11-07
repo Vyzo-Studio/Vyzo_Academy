@@ -147,6 +147,13 @@ Observação: “implementado” significa código na branch; serviço externo n
 - Não integra os PRs #8/#10/#12/#13/#16/#18, não ativa contas, IA ou cadastro infantil, não altera Supabase nem o código-fonte de questões.
 - **Limitação:** teste estático de release não valida identidade real, proteção de idade, RLS em HTTP, provedor pago nem conformidade jurídica; preservar os bloqueios dos Módulos 04/06/12/21/36.
 
+## Lote V16 — Integridade de fontes na pesquisa de provas (Módulos 11, 12 e 33)
+
+- `academy/v10-research.mjs`: endurece a verificação cliente de URLs institucionais contra normalização antecipada de caminho (`%2e`, `%2f`, `%5c`, `/../` e `//`), mantendo HTTPS/domínios previstos.
+- Valida datas de calendário UTC: datas impossíveis (ex.: `2026-02-31`) tornam-se **não confirmadas**, em vez de anunciadas como oficiais.
+- `tests/v10_research.test.mjs` contém testes adversariais. O frontend público segue fallback manual sem habilitar autenticação/IA ou serviço pago.
+- **Bloqueio mantido:** pesquisa real com provedor/edital não homologada; referências institucionais ainda exigem verificação do conteúdo.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
