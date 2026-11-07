@@ -1,9 +1,9 @@
 name: Quality checks
 on:
   push:
-    branches: [main, feat-v13-subject-autocomplete, feat-v14-education-foundations, feat-v15-universal-pathways, release-v15-stage01-safe, feat-writing-lab-b1-secure-assessment, feat-writing-lab-b2-safe-editor-submit]
+    branches: [main, feat-v13-subject-autocomplete, feat-v14-education-foundations, feat-v15-universal-pathways, release-v15-stage01-safe, feat-writing-lab-b1-secure-assessment, feat-writing-lab-b2-safe-editor-submit, feat-writing-lab-b3-secure-result-ui]
   pull_request:
-    branches: [main, feat-writing-lab-a-proposals-editor, feat-writing-lab-b1-secure-assessment]
+    branches: [main, feat-writing-lab-a-proposals-editor, feat-writing-lab-b1-secure-assessment, feat-writing-lab-b2-safe-editor-submit]
   workflow_dispatch:
 permissions:
   contents: read
@@ -55,6 +55,11 @@ jobs:
           node --check academy/essay-lab-ui.mjs
           node tests/essay_b2_client.test.mjs
           python3 tests/essay_b2_browser.py
+      - name: Essay B3 — server-persisted results, safe rendering and recovery
+        run: |
+          node --check academy/essay-assessment-report.mjs
+          node --check academy/app.mjs
+          node tests/essay_b3_report.test.mjs
       - name: Public questionnaire demo browser test
         run: python3 tests/browser_demo.py
 
