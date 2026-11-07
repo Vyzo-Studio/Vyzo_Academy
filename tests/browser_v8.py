@@ -67,19 +67,22 @@ def build_html(mock=False):
  ui=re.sub(r"^import \{WRITING_CATEGORIES,[\s\S]*?\} from './essay-lab.mjs';\s*","",ui,count=1,flags=re.M)
  assess=(root/'academy/essay-assessment-client.mjs').read_text().replace('export ','')
  assess=assess.replace("import {getWritingProposal,essayMetrics} from './essay-lab.mjs';",'')
+ report=(root/'academy/essay-assessment-report.mjs').read_text().replace('export ','')
+ report=report.replace("import {validateAssessmentEnvelope} from './essay-assessment-client.mjs';",'').replace("import {getWritingProposal} from './essay-lab.mjs';",'')
  app=(root/'academy/app.mjs').read_text()
  for declaration in [
   "import {generateSchedule,verifySchedule,WEEKDAYS,validMinutes} from './scheduler.mjs';",
   "import {evaluateDiagnostic,selectDiagnosticQuestions} from './diagnostics.mjs';",
   "import {getWritingProposal,WRITING_PROPOSALS,newEssayRecord,essayMetrics,formatWritingTimer,essayVersionSnapshot} from './essay-lab.mjs';",
   "import {renderWritingCatalog,renderWritingEditor,refreshWritingCounters} from './essay-lab-ui.mjs';",
-  "import {eligibleEssay,submitSavedEssay} from './essay-assessment-client.mjs';"
+  "import {eligibleEssay,submitSavedEssay} from './essay-assessment-client.mjs';",
+  "import {readPersistedAssessment,readLatestAssessment,renderAssessmentReport} from './essay-assessment-report.mjs';"
  ]:
   assert declaration in app,('Missing fixture import',declaration)
   app=app.replace(declaration,'')
  if mock:
   app=app.replace("const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm');","const {createClient}={createClient:()=>window.__fakeClient};")
- html=html.replace('<script type="module" src="./app.mjs"></script>','<script type="module">'+scheduler+'\n'+diagnostic+'\n'+lab+'\n'+ui+'\n'+assess+'\n'+app+'</script>')
+ html=html.replace('<script type="module" src="./app.mjs"></script>','<script type="module">'+scheduler+'\n'+diagnostic+'\n'+lab+'\n'+ui+'\n'+assess+'\n'+report+'\n'+app+'</script>')
  return html
 
 def suite():
