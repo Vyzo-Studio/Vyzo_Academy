@@ -46,14 +46,15 @@ async function authenticate(projectUrl,publicKey,token){
  const user=await response.json();
  if(!user?.id||!user.email_confirmed_at||user.is_anonymous===true)return null;
  // app_metadata só é modificável por servidores privilegiados.
- if(user.app_metadata?.academy_ai_research_allowed!==true)return null;
+ if(user.app_metadata?.academy_ai_research_allowed!==true||
+    user.app_metadata?.academy_adult_verified!==true)return null;
  return user;
 }
-async function reserve(projectUrl,publicKey,token,queryLength){
- const response=await fetchBounded(projectUrl+'/rest/v1/rpc/academy_reserve_research',{
+async function reserve(projectUrl,adminKey,userId,queryLength){
+ const response=await fetchBounded(projectUrl+'/rest/v1/rpc/academy_reserve_research_for_student',{
   method:'POST',
-  headers:{apikey:publicKey,Authorization:'Bearer '+token,'Content-Type':'application/json'},
-  body:JSON.stringify({p_query_length:queryLength})
+  headers:{apikey:adminKey,Authorization:'Bearer '+adminKey,'Content-Type':'application/json'},
+  body:JSON.stringify({p_user_id:userId,p_query_length:queryLength})
  },4500);
  if(!response.ok){
   if(response.status===401||response.status===403)return {error:'forbidden'};
@@ -129,7 +130,7 @@ export async function handleResearchRequest(req){
  if(!enabled||!providerKey||!model||!adminKey)
   return failure('Pesquisa com IA ainda não habilitada. Utilize a pesquisa manual.',503,headers);
  let reserved;
- try{reserved=await reserve(projectUrl,publicKey,token,query.length);}
+ try{reserved=await reserve(projectUrl,adminKey,user.id,query.length);}
  catch{return failure('Limite de uso temporariamente indisponível.',503,headers);}
  if(reserved.error==='limited')return failure('Cota ou intervalo de pesquisa atingido.',429,headers,{'Retry-After':'60'});
  if(reserved.error==='forbidden')return failure('Conta não autorizada.',403,headers);
