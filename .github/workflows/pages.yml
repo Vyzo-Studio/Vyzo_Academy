@@ -52,6 +52,8 @@ jobs:
           node tests/curriculum_taxonomy.test.mjs
       - name: Verify V15 school stages and content isolation
         run: node tests/v15_pathways.test.mjs
+      - name: V16 source-based ENEM archive contracts
+        run: node tests/v16_official_papers.test.mjs
       - name: Gate safe V15 release (no auth, unreviewed pilots or cloud)
         run: node tests/v15_release_gate.test.mjs
       - name: Browser regression V9 (local storage simulated)
