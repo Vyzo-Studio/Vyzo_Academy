@@ -1,0 +1,37 @@
+name: Stage03 Auth Preproduction (no deploy)
+on:
+  push:
+    branches:
+      - feat-v16-2-auth-reconciliation-preprod
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  auth-preproduction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Stage03 Auth modules
+        run: |
+          node --check academy/app.mjs
+          node --check academy/v12-auth-core.mjs
+          node --check academy/cloud-snapshot.mjs
+          node --check academy/account-import.mjs
+          node --check academy/v9-cloud-gate.mjs
+          node --check academy/v9.mjs
+          node tests/stage03_auth.test.mjs
+      - name: Verify retained V9 and exam logic
+        run: |
+          node tests/v9_core.test.mjs
+          node tests/v15_pathways.test.mjs
+          node tests/v10_research.test.mjs
+      - name: Confirm release is blocked
+        run: |
+          if node tests/v16_release_security_gate.test.mjs; then
+            echo 'ERROR: staged Auth must not be considered ready for public release.'
+            exit 1
+          fi
+          echo 'PASS: public release remains intentionally blocked in Auth preproduction.'
