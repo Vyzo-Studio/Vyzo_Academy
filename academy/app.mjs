@@ -1,5 +1,8 @@
 import {generateSchedule,verifySchedule,WEEKDAYS,validMinutes} from './scheduler.mjs';
 import {evaluateDiagnostic,selectDiagnosticQuestions} from './diagnostics.mjs';
+import {scanLegacySources,importForAccount,listHistory,readSnapshot,readHistoryArchive,downloadSnapshot} from './cloud-snapshot.mjs';
+import {getVerifiedStudent} from './v12-auth-core.mjs';
+import {mountAccountImport} from './account-import.mjs';
 
 /* VYZO ACADEMY — V8.0.1: cliente cloud. Não contém credenciais privilegiadas. */
 const $=s=>document.querySelector(s);
@@ -18,7 +21,14 @@ const week=(dt)=>{const d=new Date(dt);d.setHours(12,0,0,0);return d;};
 const fmtClock=m=>`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
 const safeExternalUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null}catch{return null}};
 const configReady=()=>/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(String(cfg.url||'')) && (/^sb_publishable_/.test(String(cfg.publishableKey||''))||/^eyJ/.test(String(cfg.publishableKey||'')));
-const data={client:null,user:null,profile:null,goals:[],diagnostics:[],tasks:[],essays:[],page:'home',activeGoalId:null,activeDiagnostic:null,questionPosition:0,authTab:'signup',onboard:1,selectedTypes:[],calendarView:'week',calendarOffset:0,calendarFilter:'all',recovery:false,busy:false,essayTimer:null,essayPending:null,lastSync:null};
+const data={client:null,user:null,profile:null,archives:[],goals:[],diagnostics:[],tasks:[],essays:[],page:'home',activeGoalId:null,activeDiagnostic:null,questionPosition:0,authTab:'login',onboard:1,selectedTypes:[],calendarView:'week',calendarOffset:0,calendarFilter:'all',recovery:false,busy:false,essayTimer:null,essayPending:null,lastSync:null};
+let authGeneration=0;
+function erasePrivateState(){
+ authGeneration++;clearTimeout(data.essayTimer);data.essayPending=null;data.activeEssay=null;
+ data.user=null;data.profile=null;data.goals=[];data.diagnostics=[];data.tasks=[];
+ data.essays=[];data.archives=[];data.activeGoalId=null;data.activeDiagnostic=null;
+ data.questionPosition=0;data.onboard=1;data.lastSync=null;
+}
 function say(message,type='info'){
  const el=$('#toast');el.textContent=message;el.dataset.type=type;
 }
@@ -67,6 +77,7 @@ async function setup(){
    const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm');
    data.client=createClient(cfg.url,cfg.publishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
    data.client.auth.onAuthStateChange((event,session)=>{
+      if(event==='SIGNED_OUT'||event==='SIGNED_IN'&&data.user&&session?.user?.id!==data.user.id){erasePrivateState();data.authTab='login';renderAuth();}
      if(event==='PASSWORD_RECOVERY'){data.recovery=true;setTimeout(()=>{data.authTab='reset';renderAuth();},0);return;}
      if(['SIGNED_IN','SIGNED_OUT','USER_UPDATED','TOKEN_REFRESHED'].includes(event))setTimeout(()=>bootstrap().catch(e=>notifyError(e,'Restauração de sessão')),0);
    });
@@ -74,32 +85,45 @@ async function setup(){
  }catch(e){setStatus('Conexão indisponível');disableUI('Não foi possível carregar o provedor de autenticação de forma segura.');}
 }
 async function bootstrap(){
+ let generation=++authGeneration;
  const {data:result,error}=await data.client.auth.getUser();
- if(error||!result?.user){data.user=null;data.profile=null;data.goals=[];data.tasks=[];data.essays=[];setStatus('Conta necessária');renderAuth();return;}
+ if(generation!==authGeneration)return;
+ if(error||!result?.user){erasePrivateState();setStatus('Conta necessária');renderAuth();return;}
+ if(data.user&&data.user.id!==result.user.id){erasePrivateState();generation=authGeneration;}
  data.user=result.user;
- if(!data.user.email_confirmed_at){setStatus('Verifique seu e-mail');renderUnverified();return;}
+ if(!data.user.email_confirmed_at||data.user.is_anonymous){setStatus('Verifique seu e-mail');renderUnverified();return;}
+ const identity=data.user.id;
+ setStatus('Sincronizando...');
+ await loadData(identity);
+ if(generation!==authGeneration||data.user?.id!==identity)return;
  setStatus('Conectado à nuvem');
- await loadData();
  if(!data.profile?.onboarding_complete){renderOnboarding();return;}
  nav();render();
 }
-async function loadTable(table,columns='*'){
- const {data:rows,error}=await data.client.from(table).select(columns).eq('user_id',data.user.id);
+async function loadTable(table,columns='*',ownerId=data.user?.id){
+ if(!ownerId)throw Error('Sessão ausente.');
+ const {data:rows,error}=await data.client.from(table).select(columns).eq('user_id',ownerId);
  if(error)throw error;return rows||[];
 }
-async function loadData(){
+async function loadData(identity=data.user?.id){
+ if(!identity)throw Error('Sessão ausente.');
  const [profiles,goals,diagnostics,tasks,essays]=await Promise.all([
-  loadTable('academy_profiles'),loadTable('academy_goals'),loadTable('academy_diagnostics'),loadTable('academy_study_tasks'),loadTable('academy_essays')
+  loadTable('academy_profiles','*',identity),loadTable('academy_goals','*',identity),
+  loadTable('academy_diagnostics','*',identity),loadTable('academy_study_tasks','*',identity),
+  loadTable('academy_essays','*',identity)
  ]);
+ const fresh=await getVerifiedStudent(data.client);
+ if(!fresh||fresh.id!==identity||data.user?.id!==identity)throw Error('A conta ativa mudou durante o carregamento.');
  data.profile=profiles[0]||null;data.goals=goals;data.diagnostics=diagnostics;
  data.tasks=tasks.sort((a,b)=>String(a.day).localeCompare(String(b.day)));
  data.essays=essays;
  if(!data.profile){
-   const name=String(data.user.user_metadata?.display_name||'Estudante').slice(0,100);
-   const accepted=data.user.user_metadata?.terms_accepted_at;
-   const {data:newProfile,error}=await data.client.from('academy_profiles').insert({user_id:data.user.id,display_name:name,terms_accepted_at:accepted&&Number.isFinite(Date.parse(accepted))?accepted:null}).select().single();
-   if(error)throw error;data.profile=newProfile;
+  const name=String(data.user.user_metadata?.display_name||'Estudante').slice(0,100);
+  const accepted=data.user.user_metadata?.terms_accepted_at;
+  const {data:newProfile,error}=await data.client.from('academy_profiles').insert({user_id:identity,display_name:name,terms_accepted_at:accepted&&Number.isFinite(Date.parse(accepted))?accepted:null}).select().single();
+  if(error)throw error;data.profile=newProfile;
  }
+ data.archives=await listHistory(data.client,identity);
  data.lastSync=new Date();
 }
 async function put(table,payload,filter){
@@ -115,11 +139,12 @@ function authView(){return `<div class="auth-shell"><div class="card stack"><div
  <div class="auth-tabs" role="tablist" aria-label="Opções de autenticação">
   ${[['signup','Criar conta'],['login','Entrar'],['forgot','Esqueci a senha']].map(([k,v])=>`<button type="button" data-auth-tab="${k}" role="tab" aria-selected="${data.authTab===k}" class="${data.authTab===k?'active':''}">${v}</button>`).join('')}
  </div>
- ${data.authTab==='signup'?`<form class="form" id="form-signup">
+ ${data.authTab==='signup'&&!cfg.registrationEnabled?`<div class="callout warning"><strong>Inscrições temporariamente fechadas.</strong> A confirmação de e-mail e a proteção etária ainda estão em homologação. Contas de menores não são permitidas. Se já possui conta, escolha Entrar.</div>`:data.authTab==='signup'?`<form class="form" id="form-signup">
  ${field('Nome para exibição','display_name','text','','required minlength="2" maxlength="100" autocomplete="name"')}
  ${field('E-mail','email','email','','required autocomplete="email"')}
  <div class="field"><label for="f-password">Senha (mínimo de 12 caracteres)</label><div class="password-line"><input id="f-password" type="password" name="password" minlength="12" maxlength="128" required autocomplete="new-password"><button type="button" data-action="reveal" data-target="f-password" aria-label="Mostrar ou ocultar senha">Mostrar</button></div><small>Use uma senha longa, difícil de adivinhar, com letras, números e símbolos.</small></div>
  <div class="field"><label for="f-confirm">Confirmar senha</label><div class="password-line"><input id="f-confirm" type="password" name="confirm" minlength="12" required autocomplete="new-password"><button type="button" data-action="reveal" data-target="f-confirm">Mostrar</button></div></div>
+ <label class="small"><input type="checkbox" name="adult" required> Confirmo que tenho 18 anos ou mais. O cadastro de menores está indisponível.</label>
  <label class="small"><input type="checkbox" name="accepted" required> Li e aceito os <a target="_blank" rel="noopener" href="./termos.html">termos de uso</a> e a <a href="../privacidade.html" target="_blank" rel="noopener">política de privacidade</a>.</label><button type="submit" class="btn">Criar conta</button></form>`:
  data.authTab==='login'?`<form class="form" id="form-login">${field('E-mail','email','email','','required autocomplete="email"')}
  <div class="field"><label for="f-password">Senha</label><div class="password-line"><input id="f-password" type="password" name="password" required autocomplete="current-password"><button type="button" data-action="reveal" data-target="f-password">Mostrar</button></div></div><button type="submit" class="btn">Entrar</button></form>`:
@@ -133,10 +158,12 @@ async function handleAuth(form){
  if(data.busy)return;busy(true);
  try{
  if(type==='form-signup'){
+   if(!cfg.registrationEnabled)throw Error('Inscrições indisponíveis até homologação.');
+   if(fd.get('adult')!=='on')throw Error('Cadastro somente para maiores de 18 anos.');
    const pwd=String(fd.get('password')||'');
    if(pwd.length<12||pwd!==fd.get('confirm'))throw Error('As senhas precisam coincidir e ter pelo menos 12 caracteres.');
    if(!fd.get('accepted'))throw Error('Aceite os termos e a política de privacidade.');
-   const {error}=await data.client.auth.signUp({email,password:pwd,options:{emailRedirectTo:publicUrl,data:{display_name:String(fd.get('display_name')||'Estudante').slice(0,100),terms_accepted_at:new Date().toISOString()}}});
+   const {error}=await data.client.auth.signUp({email,password:pwd,options:{emailRedirectTo:publicUrl,data:{display_name:String(fd.get('display_name')||'Estudante').slice(0,100),terms_accepted_at:new Date().toISOString(),vyzo_adult_attested:'true'}}});
    if(error)throw error;
    say('Se o cadastro puder ser concluído, você receberá um e-mail de confirmação. Verifique sua caixa de entrada e spam.');
    data.authTab='login';renderAuth();
@@ -355,16 +382,10 @@ function renderAccount(){const p=data.profile||{};
  <p class="muted small">E-mail atual: ${esc(data.user?.email||'')}</p>${availableMarkup(p.availability)}<button class="btn">Salvar preferências</button></form></section>
  <section class="card stack"><h2>Segurança e privacidade</h2><form id="form-email-change" class="form">${field('Novo e-mail','email','email','','required')}<button class="btn secondary">Solicitar alteração de e-mail</button></form>
  <div class="divider"></div><button class="btn secondary" data-action="reset-email">Solicitar recuperação de senha</button>
- <button class="btn ghost" data-action="import-old">Importar histórico local anterior</button><p class="small muted">A importação é opcional e não apaga o arquivo original. Só inclui conteúdo de estudo, nunca credenciais.</p>
+ <a class="btn secondary" href="./v9-cloud.html">Abrir jornada V9 sincronizada</a><p class="small muted">A importação é opcional e não apaga o arquivo original. Só inclui conteúdo de estudo, nunca credenciais.</p>
  <div class="divider"></div><button class="btn danger" data-action="logout">Sair da minha conta</button></section></div>`);
-}
-async function importOld(){let raw;try{raw=localStorage.getItem('enem-intelligence-v2');}catch{}
- if(!raw){say('Não existe histórico antigo neste navegador.','error');return;}
- let old;try{old=JSON.parse(raw);}catch{say('O backup local não contém JSON válido.','error');return;}
- const allowed={schema:old.schema,history:old.history||[],essay:old.essay||{},mentor:old.mentor||{},seenIds:old.seenIds||[]};
- if(!confirm('Copiar seu histórico antigo para sua conta na nuvem? A cópia não apaga nem altera o original.'))return;
- const {error}=await data.client.from('academy_legacy_imports').insert({user_id:data.user.id,original_state:allowed});if(error)throw error;
- say('Histórico antigo copiado para uma área privada da sua conta. Ele permanece separado dos diagnósticos específicos de cada prova.');
+ const ownerId=data.user?.id;
+ void mountAccountImport(data.client,data.user,()=>Boolean(ownerId)&&data.user?.id===ownerId&&data.page==='account').catch(()=>say('Não foi possível listar backups. Verifique sua conexão.','error'));
 }
 function render(){
  if(!data.client){disableUI('Backend ainda não configurado.');return;}
@@ -384,7 +405,7 @@ document.addEventListener('click',async ev=>{
  switch(action.dataset.action){
   case 'reveal':{const el=document.getElementById(action.dataset.target);if(!el)return;el.type=el.type==='password'?'text':'password';action.textContent=el.type==='password'?'Mostrar':'Ocultar';break;}
   case 'resend-email':{const {error}=await data.client.auth.resend({type:'signup',email:data.user.email,options:{emailRedirectTo:publicUrl}});if(error)throw error;say('Se a conta estiver pendente, um novo e-mail será enviado.');break;}
-  case 'logout':await data.client.auth.signOut();data.user=null;data.profile=null;data.goals=[];data.essays=[];data.tasks=[];data.diagnostics=[];data.authTab='login';renderAuth();break;
+  case 'logout':{erasePrivateState();const {error}=await data.client.auth.signOut();if(error)throw error;data.authTab='login';renderAuth();break;}
   case 'onboard-back':data.onboard=Math.max(1,data.onboard-1);renderOnboarding();break;
   case 'onboard-types-next':data.selectedTypes=[...document.querySelectorAll('.onboard-type:checked')].map(x=>x.value);if(!data.selectedTypes.length){say('Selecione pelo menos um tipo de prova.','error');break;}data.onboard=3;renderOnboarding();break;
   case 'goal-new':$('#goal-form-slot').innerHTML=goalForm();$('#goal-form-slot').scrollIntoView({behavior:'smooth'});break;
@@ -409,7 +430,7 @@ document.addEventListener('click',async ev=>{
   case 'essay-list':await saveEssayDraft();data.activeEssay=null;go('essay');break;
   case 'essay-version':{await saveEssayDraft();const ed=data.activeEssay;const versions=[...(ed.versions||[]),{at:new Date().toISOString(),body:ed.body||'',prompt:ed.prompt||''}];
     const updated=await put('academy_essays',{versions},ed.id);data.essays=data.essays.map(x=>x.id===ed.id?updated:x);renderEssayEditor(updated);say('Versão registrada.');break;}
-  case 'import-old':await importOld();break;
+  case 'import-old':go('account');break;
   case 'reset-email':{const {error}=await data.client.auth.resetPasswordForEmail(data.user.email,{redirectTo:publicUrl});if(error)throw error;say('Se permitido, um link foi enviado ao seu e-mail.');break;}
   default:break;
  }
