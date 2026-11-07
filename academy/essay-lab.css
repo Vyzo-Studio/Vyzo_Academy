@@ -58,3 +58,21 @@ body.essay-focus-mode .essay-writing{border:0;box-shadow:none}
 }
 @media(max-width:360px){.essay-actions{display:grid;grid-template-columns:1fr}.essay-actions .btn{width:100%}}
 @media(prefers-reduced-motion:reduce){.essay-hero,.essay-proposal-card{animation:none}}
+
+
+/* B3: relatório lido do banco, sem HTML proveniente da IA. */
+#essay-assessment-root{display:grid;gap:18px;min-width:0;max-width:100%}
+.essay-result-head,.essay-result-section{padding:clamp(16px,2.5vw,25px);background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow-wrap:anywhere}
+.essay-result-head h2{color:var(--ink);font-size:clamp(23px,3.4vw,34px);line-height:1.18;margin:8px 0 12px}
+.essay-result-section h3{font-size:clamp(17px,2.4vw,21px);color:var(--ink);margin:0 0 16px}
+.essay-result-section h4{font-size:16px;color:var(--ink);margin:13px 0 7px}
+.essay-result-section ul{padding-left:1.4rem;margin:5px 0;display:grid;gap:11px}
+.essay-result-section p,.essay-result-section li{line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.essay-result-competence{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;column-gap:12px;row-gap:8px;padding:13px 0;border-bottom:1px solid var(--line)}
+.essay-result-competence:last-child{border-bottom:0}
+.essay-result-competence h4{margin:0}
+.essay-result-competence strong{font-variant-numeric:tabular-nums;color:var(--ink)}
+.essay-result-competence p{grid-column:1/-1;margin:0}
+.essay-result-issue{padding:15px;background:var(--surface);border:1px solid var(--line);border-radius:11px;margin-top:11px}
+.essay-result-issue blockquote{margin:10px 0;padding:9px 12px;border-left:3px solid var(--accent,#386fe9);white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:420px){.essay-result-competence{grid-template-columns:1fr}.essay-result-competence p{grid-column:auto}}
