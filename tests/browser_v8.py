@@ -10,9 +10,11 @@ window.__mockEvents=[];
 window.__mockUid=0;
 const __make = () => 'test-row-'+String(++window.__mockUid);
 class MockQuery {
-  constructor(name){this.name=name;this.filters=[];this.op='select';this.body=null;this.returning=false;}
+  constructor(name){this.name=name;this.filters=[];this.op='select';this.body=null;this.returning=false;this.sortKey=null;this.desc=false;this.maxRows=null;}
   select(){this.returning=true;return this}
   eq(k,v){this.filters.push([k,v]);return this}
+  order(k,opts={}){this.sortKey=k;this.desc=opts.ascending===false;return this}
+  limit(n){this.maxRows=n;return this}
   insert(body){this.op='insert';this.body=body;return this}
   update(body){this.op='update';this.body=body;return this}
   match(r){return this.filters.every(([k,v])=>r[k]===v)}
@@ -29,7 +31,9 @@ class MockQuery {
       found.forEach(r=>Object.assign(r,this.body));
       return{data:this.returning?(found.length===1?found[0]:found):null,error:null};
     }
-    return {data:rows.filter(r=>this.match(r)&&r.user_id===window.__fakeUser?.id),error:null};
+    const matched=rows.filter(r=>this.match(r)&&r.user_id===window.__fakeUser?.id);
+    if(this.sortKey)matched.sort((a,b)=>String(a[this.sortKey]||'').localeCompare(String(b[this.sortKey]||''))*(this.desc?-1:1));
+    return {data:this.maxRows===null?matched:matched.slice(0,this.maxRows),error:null};
   }
   single(){const r=this.execute();if(Array.isArray(r.data)){return Promise.resolve({data:r.data[0]||null,error:r.data.length?null:{message:'No rows'}})}return Promise.resolve(r)}
   then(ok,bad){return Promise.resolve(this.execute()).then(ok,bad)}
