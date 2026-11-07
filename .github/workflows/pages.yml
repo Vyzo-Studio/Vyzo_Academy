@@ -21,6 +21,8 @@ jobs:
         run: python3 scripts/build.py --check
       - name: V16 pedagogical arithmetic and bundle evidence
         run: node tests/v16_quantitative_bank.test.mjs
+      - name: V16 PWA privacy and offline navigation guard
+        run: node tests/v16_pwa_cache.test.mjs
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

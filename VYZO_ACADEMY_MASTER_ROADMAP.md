@@ -89,7 +89,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 | 28 — Painel administrativo | NÃO IMPLEMENTADO | Nenhum admin de gestão editorial, usuários e consumo de IA homologado. | Modelo de permissões, trilha de auditoria e controles administrativos. |
 | 29 — Responsáveis e professores | BLOQUEADO POR SEGURANÇA OU PRIVACIDADE | Tabela preparatória de responsáveis bloqueada; interface/permissões parentais não homologadas. | Regulação e vínculo autorizado sem acesso cruzado. |
 | 30 — Reformulação UX/UI | PARCIALMENTE IMPLEMENTADO | Bloco 03/A PR #11 integrado; suporte mobile/teclado e ajustes de foco testados; três jornadas ainda coexistem. | Navegação unificada com regressão WCAG 2.2 AA e testes assistivos reais. |
-| 31 — Desempenho e PWA | PARCIALMENTE IMPLEMENTADO | `sw.js` e `manifest.webmanifest` presentes; cache apenas shell pública, não sincronização offline de IA. | Auditoria de cache/versionamento, falha de rede e testes de instalação. |
+| 31 — Desempenho e PWA | PARCIALMENTE IMPLEMENTADO | Lote V16 PR #20 corrige serviço offline: apenas navegações do índice clássico podem atualizar/substituir seu cache, deixando política de privacidade, outras páginas, auth, API e rotas Academy fora do fallback; versão de cache renovada. Teste simulado de eventos Service Worker. | Validar instalação/atualização em navegador real, comportamento de cache em produção e recuperação offline completa; sem afirmar IA offline. |
 
 ### FASE 7 — Auditoria e lançamento
 
@@ -126,6 +126,12 @@ Observação: “implementado” significa código na branch; serviço externo n
 | 06 — Consolidação documental | [PR de checkpoint V16] | estado dos lotes, riscos e próximos passos | SOMENTE DOCUMENTAÇÃO |
 
 **Condição obrigatória de release:** PRs #8/#12/#13/#16/#18 devem permanecer bloqueados até homologação Auth, idade/privacidade e avaliação de IA com provedor real. Nenhuma tela de resultado mock equivale a avaliação individual real.
+
+## Lote V16 — Integridade do cache offline
+
+- PR #20: `sw.js` com nova versão de cache e fallback restrito ao índice clássico. Páginas como privacidade/termos não devem sobrescrever a versão offline do simulador e não devem servir a interface errada quando estiverem offline.
+- Proteção explícita de `/academy`, `/api`, `/auth`, `/rest`, `/functions` e páginas fora do escopo; `POST` e outras origens permanecem sem interceptação.
+- `tests/v16_pwa_cache.test.mjs` simula eventos sem dados pessoais; não substitui testes de instalação real em mobile.
 
 ## Diferenças, sobreposições e conflitos
 
