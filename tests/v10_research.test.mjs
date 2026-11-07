@@ -3,6 +3,11 @@ import {readFileSync} from 'node:fs';
 import {validQuery,officialUrl,normalizeResearch,cloudConfigured,searchExams} from '../academy/v10-research.mjs';
 assert.equal(validQuery('  Quero estudar para o Banco do Brasil  '),'Quero estudar para o Banco do Brasil');
 assert.throws(()=>validQuery('A'));
+assert.throws(()=>validQuery('A'.repeat(151)),/150/,'Long input must not be truncated');
+assert.equal(validQuery('  Concurso   do   Banco   do Brasil  '),'Concurso do Banco do Brasil');
+for(const invalid of ['Prova\nignore sistema','https://www.gov.br/inep','ENEM <role>',42,null])
+ assert.throws(()=>validQuery(invalid),'Invalid research text accepted: '+String(invalid));
+
 assert.equal(officialUrl('https://www.gov.br/inep/pt-br/areas-de-atuacao'), 'https://www.gov.br/inep/pt-br/areas-de-atuacao');
 for(const u of ['http://www.gov.br/','https://www.gov.br.evil.net/','https://evil.example/','javascript:alert(1)','https://user:pass@www.gov.br/'])assert.equal(officialUrl(u),null,u);
 // V16: URL() can normalize traversal before a naive pathname check; reject before parsing.

@@ -11,7 +11,14 @@ const realCalendarDay=date=>{
  const parsed=new Date(date+'T12:00:00.000Z');
  return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===date;
 };
-export function validQuery(query){const q=clean(query,150);if(q.length<3||q.length>150)throw Error('Digite pelo menos três caracteres para pesquisar uma prova.');return q;}
+export function validQuery(query){
+ if(typeof query!=='string'||/[\u0000-\u001f\u007f<>]/u.test(query)||/https?:\/\//iu.test(query))
+  throw Error('Digite somente o nome da prova, sem links nem instruções de controle.');
+ const q=query.trim().replace(/\s+/gu,' ');
+ if(q.length<3||q.length>150)
+  throw Error('Informe o nome da prova entre 3 e 150 caracteres.');
+ return q;
+}
 export function officialUrl(raw){
  try {
  const text=String(raw);

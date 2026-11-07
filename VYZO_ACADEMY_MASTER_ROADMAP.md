@@ -161,6 +161,12 @@ Observação: “implementado” significa código na branch; serviço externo n
 - PR #23 (gate de release) e PR #26 (segurança de fontes e datas) foram integrados à `main` com CI aprovado; esta atualização preserva os checkpoints anteriores.
 - **Conclusão geral: NÃO PRONTO para lançamento universal**; segue possível operar as funcionalidades locais existentes dentro de suas limitações. Nenhum recurso pago, conta infantil ou autenticação foi ativado.
 
+## Lote V16 — Validação de entrada de busca (Módulos 11 e 33)
+
+- `academy/v10-research.mjs`: a pesquisa deixa de truncar silenciosamente mais de 150 caracteres. Consultas inválidas (links, controles, quebras de linha, `<...>`) são rejeitadas com aviso em PT-BR, antes de chamar o provedor.
+- `tests/v10_research.test.mjs`: casos de fronteira para consulta longa, normalização de espaços e entradas não confiáveis.
+- Sem chamada paga, sem alteração dos perfis públicos ou do banco; o backend V10 segue bloqueado até a homologação da autenticação e da IA.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
