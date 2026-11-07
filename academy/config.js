@@ -1,7 +1,9 @@
-/* VYZO ACADEMY V8 — apenas URL e chave PÚBLICA de um projeto exclusivo.
-   NUNCA coloque secret/service_role, senha de banco ou credencial privada aqui.
-   A autenticação só é habilitada quando os dois valores forem configurados. */
-window.VYZO_ACADEMY_CLOUD = Object.freeze({
-  url: '',
-  publishableKey: ''
+/* VYZO ACADEMY V16.2 — Pré-produção. Contas não estão homologadas.
+ * Somente URL e chave PUBLICÁVEL devem ser configuradas após QA de segurança.
+ * Nunca adicionar service_role, tokens de IA ou chaves privadas ao navegador.
+ */
+window.VYZO_ACADEMY_CLOUD=Object.freeze({
+  url:'',
+  publishableKey:'',
+  registrationEnabled:false
 });
