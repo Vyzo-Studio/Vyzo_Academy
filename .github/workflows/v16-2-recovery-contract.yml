@@ -1,0 +1,17 @@
+name: V16.2 Recovery Drill Contract
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [test-v16-2-isolated-history-recovery]
+permissions:
+  contents: read
+jobs:
+  recovery-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node tests/v16_2_recovery_contract.test.mjs
