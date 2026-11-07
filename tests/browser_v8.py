@@ -10,9 +10,11 @@ window.__mockEvents=[];
 window.__mockUid=0;
 const __make = () => 'test-row-'+String(++window.__mockUid);
 class MockQuery {
-  constructor(name){this.name=name;this.filters=[];this.op='select';this.body=null;this.returning=false;}
+  constructor(name){this.name=name;this.filters=[];this.op='select';this.body=null;this.returning=false;this.sortKey=null;this.desc=false;this.maxRows=null;}
   select(){this.returning=true;return this}
   eq(k,v){this.filters.push([k,v]);return this}
+  order(k,opts={}){this.sortKey=k;this.desc=opts.ascending===false;return this}
+  limit(n){this.maxRows=n;return this}
   insert(body){this.op='insert';this.body=body;return this}
   update(body){this.op='update';this.body=body;return this}
   match(r){return this.filters.every(([k,v])=>r[k]===v)}
@@ -29,7 +31,9 @@ class MockQuery {
       found.forEach(r=>Object.assign(r,this.body));
       return{data:this.returning?(found.length===1?found[0]:found):null,error:null};
     }
-    return {data:rows.filter(r=>this.match(r)&&r.user_id===window.__fakeUser?.id),error:null};
+    const matched=rows.filter(r=>this.match(r)&&r.user_id===window.__fakeUser?.id);
+    if(this.sortKey)matched.sort((a,b)=>String(a[this.sortKey]||'').localeCompare(String(b[this.sortKey]||''))*(this.desc?-1:1));
+    return {data:this.maxRows===null?matched:matched.slice(0,this.maxRows),error:null};
   }
   single(){const r=this.execute();if(Array.isArray(r.data)){return Promise.resolve({data:r.data[0]||null,error:r.data.length?null:{message:'No rows'}})}return Promise.resolve(r)}
   then(ok,bad){return Promise.resolve(this.execute()).then(ok,bad)}
@@ -67,19 +71,22 @@ def build_html(mock=False):
  ui=re.sub(r"^import \{WRITING_CATEGORIES,[\s\S]*?\} from './essay-lab.mjs';\s*","",ui,count=1,flags=re.M)
  assess=(root/'academy/essay-assessment-client.mjs').read_text().replace('export ','')
  assess=assess.replace("import {getWritingProposal,essayMetrics} from './essay-lab.mjs';",'')
+ report=(root/'academy/essay-assessment-report.mjs').read_text().replace('export ','')
+ report=report.replace("import {validateAssessmentEnvelope} from './essay-assessment-client.mjs';",'').replace("import {getWritingProposal} from './essay-lab.mjs';",'')
  app=(root/'academy/app.mjs').read_text()
  for declaration in [
   "import {generateSchedule,verifySchedule,WEEKDAYS,validMinutes} from './scheduler.mjs';",
   "import {evaluateDiagnostic,selectDiagnosticQuestions} from './diagnostics.mjs';",
   "import {getWritingProposal,WRITING_PROPOSALS,newEssayRecord,essayMetrics,formatWritingTimer,essayVersionSnapshot} from './essay-lab.mjs';",
   "import {renderWritingCatalog,renderWritingEditor,refreshWritingCounters} from './essay-lab-ui.mjs';",
-  "import {eligibleEssay,submitSavedEssay} from './essay-assessment-client.mjs';"
+  "import {eligibleEssay,submitSavedEssay} from './essay-assessment-client.mjs';",
+  "import {readPersistedAssessment,readLatestAssessment,renderAssessmentReport} from './essay-assessment-report.mjs';"
  ]:
   assert declaration in app,('Missing fixture import',declaration)
   app=app.replace(declaration,'')
  if mock:
   app=app.replace("const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm');","const {createClient}={createClient:()=>window.__fakeClient};")
- html=html.replace('<script type="module" src="./app.mjs"></script>','<script type="module">'+scheduler+'\n'+diagnostic+'\n'+lab+'\n'+ui+'\n'+assess+'\n'+app+'</script>')
+ html=html.replace('<script type="module" src="./app.mjs"></script>','<script type="module">'+scheduler+'\n'+diagnostic+'\n'+lab+'\n'+ui+'\n'+assess+'\n'+report+'\n'+app+'</script>')
  return html
 
 def suite():

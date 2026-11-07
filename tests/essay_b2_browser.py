@@ -44,12 +44,32 @@ with sync_playwright() as pw:
     invoke:async (name,options)=>{
      window.__calls.push({name,payload:options.body});
      if(window.__failOnce){window.__failOnce=false;return {data:null,error:{context:{status:503}}};}
-     return {error:null,data:{
-      status:'completed',assessment_id:id,
-      result:{official:false,estimated:true,rubric_id:'enem-cartilha-2026',
-       status:'scored',total_score:800,issues:[],
-       competences:['C1','C2','C3','C4','C5'].map(id=>({id,score:160,rationale:'Justificativa específica encontrada na redação de treinamento.'}))}
-     }};
+     const current=window.__mockRows.academy_essays[0];
+     const report={
+      official:false,estimated:true,rubric_id:'enem-cartilha-2026',
+      status:'scored',total_score:800,
+      competences:['C1','C2','C3','C4','C5'].map(id=>({id,score:160,rationale:'Há elementos da redação que sustentam esta estimativa pedagógica.'})),
+      strengths:['A redação possui tese identificável sobre desigualdade digital.'],
+      weaknesses:['Seria benéfico detalhar a atuação das políticas públicas.'],
+      issues:[{kind:'oportunidade_melhoria',category:'argumentacao',
+       quote:'Muitas famílias ainda enfrentam conexão precária',
+       explanation:'A explicação pode apresentar dados de conexão territorial.',
+       suggestion:'Detalhar as diferenças de acesso por região.',
+       justification:'Uma evidência contextual torna a argumentação mais precisa.'}],
+      argumentation:'O texto relaciona conectividade e exercício da cidadania de forma consistente.',
+      cohesion:'Os conectivos e a progressão textual são compreensíveis.',
+      repertoire:'O texto não apresenta citações externas explícitas.',
+      intervention:'O poder público foi mencionado como agente para promover acesso.',
+      recommendations:['Apresente um exemplo de infraestrutura digital verificável.'],
+      limitations:'Estimativa de IA, sem equivalência à correção humana em folha manuscrita.'
+     };
+     window.__mockRows.academy_essay_assessments=[{
+      id,user_id:current.user_id,essay_id:current.id,
+      proposal_id:current.proposal_id,proposal_version:current.proposal_version,
+      essay_revision:current.updated_at,essay_snapshot:current.body,
+      status:'completed',report,created_at:new Date().toISOString()
+     }];
+     return {error:null,data:{status:'completed',assessment_id:id,result:report}};
     }
    };
   }""",[ASSESS,BODY])
@@ -58,7 +78,16 @@ with sync_playwright() as pw:
   expect(page.locator('#essay-assess-status')).to_contain_text('Correção não concluída',timeout=5000)
   assert page.locator('#essay-body').input_value()==BODY
   button.click()
-  expect(page.locator('#essay-assess-status')).to_contain_text('Correção concluída',timeout=5000)
+  expect(page.get_by_role('heading',name='Avaliação da redação')).to_be_visible(timeout=5000)
+  expect(page.get_by_role('heading',name='NOTA ESTIMADA: 800/1000')).to_be_visible()
+  expect(page.get_by_role('heading',name='Avaliação por competência')).to_be_visible()
+  expect(page.get_by_text('Muitas famílias ainda enfrentam conexão precária')).to_be_visible()
+  assert page.locator('#essay-body').count()==0
+  assert not page.evaluate('document.documentElement.scrollWidth>innerWidth')
+  page.locator('[data-action="essay-result-back"]').click()
+  expect(page.locator('#essay-body')).to_have_value(BODY)
+  page.locator('[data-action="essay-latest-assessment"]').click()
+  expect(page.get_by_role('heading',name='NOTA ESTIMADA: 800/1000')).to_be_visible()
   calls=page.evaluate('window.__calls')
   assert len(calls)==2 and all(c['name']=='academy-essay-assess' for c in calls)
   assert all(set(c['payload'])=={'essay_id','revision'} for c in calls)
