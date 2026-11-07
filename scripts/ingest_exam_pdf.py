@@ -31,11 +31,15 @@ def institutional_source(url: str) -> str:
         raise InvalidDocument("Informe uma URL institucional HTTPS para a origem.")
     if any(ord(char) < 32 for char in url) or "\\" in url:
         raise InvalidDocument("A URL da origem contém caracteres inválidos.")
-    parsed = urlsplit(url)
-    host = (parsed.hostname or "").lower().rstrip(".")
+    try:
+        parsed = urlsplit(url)
+        host = (parsed.hostname or "").lower().rstrip(".")
+        port = parsed.port
+    except ValueError as exc:
+        raise InvalidDocument("A URL institucional está malformada.") from exc
     if (
         parsed.scheme != "https" or not host or parsed.username or parsed.password
-        or parsed.port not in (None, 443)
+        or port not in (None, 443)
         or host not in OFFICIAL_HOSTS and not any(host.endswith("." + allowed) for allowed in OFFICIAL_HOSTS)
     ):
         raise InvalidDocument("A URL deve apontar para um domínio institucional HTTPS permitido.")
