@@ -69,7 +69,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 | 18 — Simulados completos | PARCIALMENTE IMPLEMENTADO | Simulados e correção local ativos; composer por áreas/diagnósticos, banco limitado; prova ENEM 90+redação não validada E2E. | Curar cobertura suficiente e homologar dois dias, tempos e redação. |
 | 19 — Cronômetro e ambiente de prova | PARCIALMENTE IMPLEMENTADO | V14 registra cronômetro/pausa/contagem regressiva local e retomada; faltam garantias robustas de prova de alto risco. | Testes de relógio ao fechar/reabrir e integridade entre sessões/dispositivos. |
 | 20 — Laboratório de redação | IMPLEMENTADO, AGUARDANDO HOMOLOGAÇÃO | Oficina clássica disponível na `main`; novo editor/temas/versões PR #12 com CI aprovado, ainda draft. | Homologar Auth, dados, migração e integrar com segurança, sem substituir legado. |
-| 21 — Corretor de redação com IA real | BLOQUEADO POR INFRAESTRUTURA | B1 no PR #13: contrato ENEM e gateway testados com mocks, sem Edge Function implantada ou avaliação real. | PR #12, Auth, provedor/budget autorizado, B2/B3 e E2E real. |
+| 21 — Corretor de redação com IA real | BLOQUEADO POR INFRAESTRUTURA | PR #13 B1: backend testado com mocks e SQL rollback; PR #16 B2: botão/envio autenticado de revisão salva, mock E2E aprovado; PR #18 B3: tela básica e leitura RLS implementadas em branch de testes. Todos draft, não publicados. | PR #8 Auth homologado, migração/endpoint B1 auditados, orçamento/provedor autorizado e avaliação REAL E2E antes de operacionalizar. |
 | 22 — Reescrita e evolução da redação | PARCIALMENTE IMPLEMENTADO | Versões de redação legada e no PR #12; marcações, comparação e histórico de notas não implementados. | Depende de avaliação real por versão e UX posterior. |
 | 23 — Professor VYZO com IA | NÃO IMPLEMENTADO | `src/mentor.js` contém professor guiado local, **não** chat com IA real. | Projetar endpoint seguro, conteúdo pedagógico e quotas após Auth. |
 | 24 — Estudar por foto ou PDF | NÃO IMPLEMENTADO | Não existe fluxo de upload/extração/validação pedagógica completo. | Políticas de arquivos, privacidade e processamento verificável. |
@@ -115,6 +115,17 @@ Observação: “implementado” significa código na branch; serviço externo n
 - **PR #17:** correção matemática no cálculo explicado de V4009; resposta correta (45) e ID preservados. Código fonte e `index.html` compilado coerentes.
 - `tests/v16_quantitative_bank.test.mjs`: valida gabaritos e cálculos de oito itens por grupo (porcentagens, proporcionalidade direta e médias aritméticas). CI adicionado. Apenas os 24 itens cobertos possuem esta evidência específica; não equivale à revisão humana do banco de 224 questões.
 - **Status do Módulo 09 permanece PARCIALMENTE IMPLEMENTADO**.
+
+## Execução V16 — Checkpoint de lotes subsequentes (07/11/2026)
+
+| Lote | PR/commit | Evidência | Estado real |
+|---|---|---|---|
+| 03 — QA matemático | [#17](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/17), merge `3e19496` | [CI aprovado](https://github.com/Vyzo-Studio/Vyzo_Academy/actions/runs/42408110973), 24 questões com contas verificadas, V4009 corrigida | INTEGRADO à `main`; o banco completo ainda exige curadoria editorial |
+| 04 — Corretor B2 | [#16](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/16), base #13 (que depende de #12) | [CI mock aprovado](https://github.com/Vyzo-Studio/Vyzo_Academy/actions/runs/42407950141); `ESSAY_B2_CHECKPOINT.md` | IMPLEMENTADO / DRAFT; não foi implantado |
+| 05 — Relatório B3 | [#18](https://github.com/Vyzo-Studio/Vyzo_Academy/pull/18), base #16 | `ESSAY_B3_CHECKPOINT.md`, testes Node/Chromium e revisão RLS em andamento | IMPLEMENTADO / AGUARDANDO CI E HOMOLOGAÇÃO, NÃO integrado |
+| 06 — Consolidação documental | [PR de checkpoint V16] | estado dos lotes, riscos e próximos passos | SOMENTE DOCUMENTAÇÃO |
+
+**Condição obrigatória de release:** PRs #8/#12/#13/#16/#18 devem permanecer bloqueados até homologação Auth, idade/privacidade e avaliação de IA com provedor real. Nenhuma tela de resultado mock equivale a avaliação individual real.
 
 ## Diferenças, sobreposições e conflitos
 
