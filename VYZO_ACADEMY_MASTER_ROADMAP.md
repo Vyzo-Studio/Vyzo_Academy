@@ -182,6 +182,14 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `tests/v16_2_pdf_ingest_test.py` usa documentos **sintéticos gerados localmente**, verifica extração, hash, PDF sem texto, arquivo inválido, spoofing de domínio/URL, porta inválida e não sobrescrita. Pipeline instala `pypdf==5.9.0` e `reportlab==4.4.9` para teste.
 - É **fundação independente de processamento**, não leitor automático validado por edital, não prova histórica convertida e não nova UI escolar; revisão humana e integração com o modelo de fontes ainda são necessárias.
 
+## V16.2 — Lote F1: língua estrangeira no estilo ENEM
+
+- Correção pedagógica dos itens **autorais** `V6A015` (Inglês) e `V6A016` (Espanhol): texto-base estrangeiro **preservado integralmente**, apresentação/contextualização, pergunta e cinco alternativas em **português brasileiro**, como estrutura observada nos cadernos do ENEM. Não reproduz nem atribui caráter oficial às questões autorais.
+- IDs `V6A015/V6A016`, posições dos gabaritos (respectivamente índices 3 e 2), explicações e histórico de progresso preservados. As outras duas questões de línguas estrangeiras `Q011/Q012` já estavam em PT-BR.
+- `index.html` recompilado com fonte `src/advanced_questions.js` para manter consistência da experiência clássica.
+- `tests/v16_2_foreign_language_enem.test.mjs` controla 224 IDs únicos, quatro enunciados em português, trechos estrangeiros originais, alternativas, gabaritos e bundle HTML. Workflow de publicação incorpora o teste. Questões ainda dependem de revisão editorial pedagógica completa.
+- Referência de estilo: índice oficial de cadernos do ENEM 2024, https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos/2024
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
