@@ -162,6 +162,7 @@ export function renderWritingEditor(root,essay,{canAssess=false}={}){
  if(p&&mode==='treino'){
   if(canAssess){
    actions.append(btn('CORRIGIR MINHA REDAÇÃO','essay-assess',null,'btn'));
+   actions.append(btn('Ver última avaliação','essay-latest-assessment',null,'btn secondary'));
    const state=el('p','Correção com IA disponível somente após autorização do servidor. O texto será salvo antes do envio.','small muted');
    state.id='essay-assess-status';state.role='status';state.setAttribute('aria-live','polite');
    editing.append(state);
