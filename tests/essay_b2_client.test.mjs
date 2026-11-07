@@ -69,7 +69,9 @@ mode='failure';await assert.rejects(submitSavedEssay({client,user,essay}),/Corre
 mode='invalid';await assert.rejects(submitSavedEssay({client,user,essay}),/soma das competências/);
 mode='success';assert.equal((await submitSavedEssay({client,user,essay})).status,'completed');
 assert.equal(invokes,4,'Após erro é permitido tentar novamente sem perder a versão original.');
-const otherClient={auth:{getUser:async()=>({data:{user:{...user,id:'someone-else'}}})},functions:{invoke:async()=>{throw Error('unexpected')}};
+const otherClient={
+ auth:{getUser:async()=>({data:{user:{...user,id:'someone-else'}}})},
+ functions:{invoke:async()=>{throw Error('unexpected');}}
 };
 await assert.rejects(submitSavedEssay({client:otherClient,user,essay}),/sessão/);
 const app=readFileSync(new URL('../academy/app.mjs',import.meta.url),'utf8');
