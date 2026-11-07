@@ -56,7 +56,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 |---|---|---|---|
 | 11 — Busca inteligente de exames | PARCIALMENTE IMPLEMENTADO | V10 tem busca e fallback manual; sugestão local confiável do ENEM; seleção assistida testada em mock. | Auth/API real, índices/catálogos de edições verificados e cache. |
 | 12 — Pesquisa oficial com IA | BLOQUEADO POR INFRAESTRUTURA | Gateway V10 `academy-exam-research` implantado com JWT; PR #10 aberto; nenhum uso real validado. | Homologar Auth, budgets/secrets, teste E2E com provedor e revisão das fontes. |
-| 13 — Leitor inteligente de editais | NÃO IMPLEMENTADO | Não há leitor de PDF/extração por páginas e validação de retificações integrado. | Projetar pipeline confiável, permissões e amostras de editais oficiais. |
+| 13 — Leitor inteligente de editais | PARCIALMENTE IMPLEMENTADO | PR #33 integrou parser Python offline de PDFs locais, com extração textual por página, limites, SHA-256 e origem explicitamente não homologada. Não há leitor integrado à experiência do aluno, OCR ou validação automática de editais. | Curadoria oficial, OCR seguro, integração autenticada, versão de retificações e amostras comprovadas. |
 | 14 — Acervo de provas anteriores | PARCIALMENTE IMPLEMENTADO | Lote V16 PR #15 reutiliza catálogo `academy/v15-official-papers.mjs`: dois pares prova/gabarito de 2024 encontrados no índice oficial do Inep, adicionados à página V9 com fallback para anos sem URLs; PDFs não puderam ser abertos/verificados (502/timeout). | Curadoria de outras edições e formatos, revisão dos arquivos e possível conversão de itens somente com licenças e QA adequados. |
 | 15 — Análise das bancas | NÃO IMPLEMENTADO | Não há análise empírica verificável de padrão/incidência por banca no código publicado. | Construir corpus por edição após acervo oficial. |
 | 16 — Preparação automática a partir do edital | PARCIALMENTE IMPLEMENTADO | V9/V14 geram objetivo/diagnóstico/plano local a partir de informações inseridas pelo estudante. | Vincular edital e disciplinas verificados, sem declarar metas específicas sem fontes. |
@@ -189,6 +189,14 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `index.html` recompilado com fonte `src/advanced_questions.js` para manter consistência da experiência clássica.
 - `tests/v16_2_foreign_language_enem.test.mjs` controla 224 IDs únicos, quatro enunciados em português, trechos estrangeiros originais, alternativas, gabaritos e bundle HTML. Workflow de publicação incorpora o teste. Questões ainda dependem de revisão editorial pedagógica completa.
 - Referência de estilo: índice oficial de cadernos do ENEM 2024, https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos/2024
+
+## V16.2 — Continuidade da execução autônoma, checkpoint dos cinco lotes
+
+- Ver [V16_2_EXECUTION_CHECKPOINT.md](./V16_2_EXECUTION_CHECKPOINT.md) para PRs, commits, evidências e bloqueios.
+- **Pré-produção:** #29 (Auth e sincronização V9 reconciliadas, autorização administrativa de adultos; sem contas reais) e #30 (gateway de pesquisa e reserva apenas pelo serviço, testes PostgreSQL reais com rollback). Ambos draft, CI de estágio aprovado; o gate de publicação é intencionalmente restritivo.
+- **Integrado à main:** #31 (ensaio real sintético de recuperação A/B, não backup de desastre), #33 (extração de PDF local, não leitura editorial verificada) e #34 (correção das duas questões autorais avançadas de idiomas para enunciado/alternativas PT-BR).
+- A `main` após #34 é `8f4d1ca662365d9e7cffca93d73d56cfbfd6ec7c`; histórico original dos estudantes mantido. CI do PR #34 aprovado e GitHub Pages pós-merge aprovado. Testes com provedores de IA e dois usuários Auth reais **não realizados**.
+- Os 36 módulos seguem **não concluídos como plataforma universal**. O módulo 13 avança de não implementado para **parcial** apenas devido à fundação offline de extração de PDF; não é portal de editais real ou auto-homologado.
 
 ## Diferenças, sobreposições e conflitos
 
