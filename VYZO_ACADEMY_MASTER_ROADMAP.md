@@ -167,6 +167,13 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `tests/v10_research.test.mjs`: casos de fronteira para consulta longa, normalização de espaços e entradas não confiáveis.
 - Sem chamada paga, sem alteração dos perfis públicos ou do banco; o backend V10 segue bloqueado até a homologação da autenticação e da IA.
 
+## V16.2 — Lote A3: ensaio real de recuperação lógica e isolamento de contas
+
+- `tests/v16_2_archive_recovery_live.sql` foi executado no PostgreSQL real **do projeto Academy exclusivo** em `BEGIN/ROLLBACK`.
+- Testou o arquivo privado V9 de uma conta sintética A, preservação exata de IDs de simulados, metas e rascunho, invisibilidade para conta B, exclusão sintética do snapshot ativo, restauração a partir do arquivo separado e validação bit a bit do JSONB via SHA-256, revisão incremental e bloqueio de restauração duplicada.
+- Resultado PostgreSQL real: **PASS**, revertendo todos os usuários, a alteração temporária do gate, arquivos e snapshots. CI em `tests/v16_2_recovery_contract.test.mjs` apenas inspeciona o contrato do ensaio; NÃO é o mesmo que rodar o banco no GitHub.
+- **Limitação explícita:** esta é recuperação lógica de histórico armazenado na própria base, **não** `pg_dump`/`pg_restore` completo, cópia offsite, Disaster Recovery ou restauração de Auth/Storage. O módulo 03 e o lançamento universal continuam sem homologação de backup operacional.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.

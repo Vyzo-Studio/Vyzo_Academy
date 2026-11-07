@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const sql=readFileSync(new URL('./v16_2_archive_recovery_live.sql',import.meta.url),'utf8');
+assert.match(sql,/^begin;/m);
+assert.match(sql,/^rollback;/m);
+assert(!/\bcommit\s*;/iu.test(sql));
+assert.match(sql,/public\.academy_private_records/u);
+assert.match(sql,/public\.academy_legacy_imports/u);
+assert.match(sql,/sha256\(/iu);
+assert.match(sql,/student B can see A data/iu);
+assert.match(sql,/duplicated restore overwrote existing state/iu);
+assert.match(sql,/vyzo-academy-v9-guest-1/u);
+assert.match(sql,/simulado-1/);
+console.log('PASS V16.2 recovery drill contract: isolated synthetic data, snapshot integrity, privacy and mandatory rollback.');
