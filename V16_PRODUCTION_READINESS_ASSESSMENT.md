@@ -2,6 +2,18 @@
 
 **Avaliação:** 07/11/2026. **Resultado:** **NÃO APROVADA PARA LANÇAMENTO UNIVERSAL**. O site público pode continuar oferecendo as funcionalidades locais já aprovadas, com os avisos e limites atuais.
 
+## Atualização de engenharia — V16.2 (07/11/2026)
+
+Cinco lotes adicionais possuem evidências documentadas em [V16_2_EXECUTION_CHECKPOINT.md](./V16_2_EXECUTION_CHECKPOINT.md). PRs #31, #33 e #34 integrados à `main`; PRs #29 (Auth) e #30 (pesquisa IA) ainda em pré-produção, separados por bloqueio deliberado de release.
+
+- Auth: reconciliada em branch, mas sem homologação E2E de contas reais; o banco permanece sem usuários e com cadastro fechado.
+- IA: endurecimento por função de reserva exclusivamente de servidor validado em transação SQL com rollback, **não implantado**; provedor real não testado.
+- Recuperação: ensaio de histórico sintético aprovado no banco real, **não** backup completo nem teste de desastre.
+- Editais: extrator offline funcional de texto de PDFs, **não** processador confiável de editais oficiais em produção.
+- Questões: correção PT-BR da apresentação de Inglês/Espanhol avançados com gabaritos e IDs preservados; não é curadoria do banco inteiro.
+
+**A avaliação geral permanece NÃO APROVADA PARA LANÇAMENTO UNIVERSAL.**
+
 ## Matriz de liberação
 
 | Requisito | Evidência verificada | Status |
@@ -14,7 +26,7 @@
 | Privacidade / idade | RLS simulada em SQL real, mas não foram homologados dois usuários reais, controles de menores ou revisão jurídica | BLOQUEADO |
 | Pesquisa de exames com IA | PR #10 draft e Edge Function com JWT; sem teste E2E autorizado com provedor/edições reais | BLOQUEADO |
 | Redação por IA | PRs #12/#13/#16/#18 encadeados, testes com mocks; sem serviço implantado ou nota real validada | BLOQUEADO |
-| Editais / provas | Dois pares de links de 2024; PDFs não lidos nem convertidos; sem extrator confiável de editais | PARCIAL |
+| Editais / provas | Dois pares oficiais de links 2024; PR #33 adicionou extrator offline de texto PDF local com hash e limites, ainda sem verificação editorial da origem, OCR ou integração com estudante | PARCIAL |
 | Backup / recuperação | Histórico do GitHub e versões SQL disponíveis; não constituem dump/restore operacional de usuários/dados | BLOQUEADO |
 | Acessibilidade | Testes automatizados de algumas larguras, teclado/foco; não comprovam WCAG 2.2 AA ou leitores de tela reais | PARCIAL |
 | Operação e incidentes | Falta observabilidade real do provedor, política de retenção, restore provado e teste de procedimentos de incidente | PARCIAL |
