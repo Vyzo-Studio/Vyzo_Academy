@@ -62,7 +62,10 @@ const gate=read('supabase/migrations/202611070003_stage03_registration_gate.sql'
 for(const token of ['signUp(','signInWithPassword(','resetPasswordForEmail(','updateUser(','signOut(','persistSession:true'])assert(app.includes(token),'Missing Auth flow: '+token);
 assert(app.includes('erasePrivateState()')&&app.includes('mountAccountImport'),'Account isolation and import UI');
 assert(config.includes('registrationEnabled: false'));
-assert(config.includes('sb_publishable_')&&!/publishableKey:\s*['"]sb_secret_/.test(config));
+assert.match(config,/url:\s*''/);
+assert.match(config,/publishableKey:\s*''/);
+assert.match(config,/registrationEnabled:false/);
+assert(!/sb_secret_/.test(config));
 assert(v9.includes("const KEY='vyzo-academy-v9-guest-1'")&&v9.includes('window.VYZO_V9_CLOUD?.queue(state)'));
 assert(cloud.includes("auth.getUser()")&&cloud.includes(".eq('revision',version)"));
 assert(gate.includes('registration_gate')&&gate.includes('guard_signup')&&gate.includes('vyzo_adult_attested'));
