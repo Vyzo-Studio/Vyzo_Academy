@@ -106,7 +106,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 | Lote | Escopo | Referências | Estado |
 |---|---|---|---|
 | 01 | Consolidar documentação auditada de 36 módulos | PR #14, merge `51ea40d`, CI `42403835667` PASS | CONCLUÍDO E VALIDADO (documentação) |
-| 02 | Fonte oficial de provas ENEM 2024 na jornada V9 sem PDF convertido | PR #15, `v15-official-papers.mjs`, `v9.mjs`, `tests/v16_official_papers.test.mjs`, `tests/v15_browser.py` | IMPLEMENTADO, AGUARDANDO CI e QA antes de merge |
+| 02 | Fonte oficial de provas ENEM 2024 na jornada V9 sem PDF convertido | PR #15, `v15-official-papers.mjs`, `v9.mjs`, testes Node e Chromium, workflow `42407086686` (commit `6186995`) | CI E REGRESSÕES APROVADOS; PDFs externos não acessíveis nesta auditoria; cobertura continua parcial |
 
 Observação: “implementado” significa código na branch; serviço externo não verificado permanece não homologado. Atualizar a tabela após o check final.
 
