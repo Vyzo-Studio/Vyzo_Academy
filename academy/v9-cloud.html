@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#101e39">
+ <meta name="description" content="VYZO ACADEMY — pesquise a prova, confirme fontes e faça o diagnóstico antes de criar seu plano.">
+ <title>VYZO ACADEMY — Estudos sincronizados</title>
+ <link rel="icon" type="image/svg+xml" href="../assets/vyzo-academy.svg">
+ <link rel="stylesheet" href="./styles.css">
+ <link rel="stylesheet" href="./v9.css">
+ <script src="../src/questions.js" defer></script>
+ <script src="../src/extra_questions.js" defer></script>
+ <script src="../src/advanced_questions.js" defer></script>
+ <script src="./config.js"></script>
+ <script type="module" src="./v9-cloud-gate.mjs"></script>
+<link rel="stylesheet" href="../src/subject-picker.css">
+<script src="../src/subject-picker.js" defer></script>
+</head>
+<body class="v9-app">
+ <a href="#v9-main" class="skip-link">Pular para o conteúdo</a>
+ <header class="topbar v9-topbar">
+  <a href="./v9.html" class="brand" aria-label="VYZO ACADEMY — início">
+   <span class="monogram" aria-hidden="true">V<span>·</span></span><span class="brand-copy"><b>VYZO ACADEMY</b><small>Seu diagnóstico vem primeiro</small></span>
+  </a>
+  <div class="v9-top-actions"><span class="v9-guest-label" title="O progresso é armazenado somente neste navegador">Conta verificada · nuvem</span><button id="v9-theme" class="icon-button v9-theme" type="button" aria-label="Alternar tema claro e escuro">◐</button></div>
+ </header>
+ <div class="v9-notice">Validando sessão privada e dados sincronizados...</div>
+ <div class="v9-shell">
+  <nav class="v9-nav" id="v9-nav" aria-label="Navegação da jornada">
+   <button type="button" data-page="hub" class="nav-link">⌂ <span>Minha jornada</span></button>
+   <button type="button" data-page="goals" class="nav-link">▣ <span>Minhas provas</span></button>
+   <button type="button" data-page="diagnostics" class="nav-link">◎ <span>Diagnósticos</span></button>
+   <button type="button" data-page="plan" class="nav-link">▦ <span>Meu plano</span></button>
+   <button type="button" data-page="study" class="nav-link">◇ <span>Estudar e revisar</span></button>
+   <button type="button" data-page="library" class="nav-link">▤ <span>Biblioteca de estudos</span></button>
+   <button type="button" data-page="past-papers" class="nav-link">▧ <span>Provas anteriores</span></button>
+   <button type="button" data-page="revisions" class="nav-link">◇ <span>Meus erros e revisões</span></button>
+   <button type="button" data-page="data" class="nav-link">⇩ <span>Backup local</span></button>
+   <a href="../index.html?classic=1" class="nav-anchor">↗ <span>Simulador clássico</span></a>
+  </nav>
+  <main id="v9-main" class="content v9-main" tabindex="-1">
+   <div id="v9-toast" role="status" aria-live="polite"></div>
+   <div id="v9-content"><div class="boot">Preparando sua jornada...</div></div>
+   <footer class="footer">VYZO ACADEMY · Avaliações autorais de estudo · Sem notas TRI ou questões oficiais atribuídas a bancas · <a href="../privacidade.html">Privacidade</a></footer>
+  </main>
+ </div>
+</body>
+</html>
