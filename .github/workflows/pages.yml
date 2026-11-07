@@ -1,9 +1,9 @@
 name: Quality checks
 on:
   push:
-    branches: [main, feat-v13-subject-autocomplete, feat-v14-education-foundations, feat-v15-universal-pathways, release-v15-stage01-safe]
+    branches: [main, feat-v13-subject-autocomplete, feat-v14-education-foundations, feat-v15-universal-pathways, release-v15-stage01-safe, feat-writing-lab-b1-secure-assessment]
   pull_request:
-    branches: [main]
+    branches: [main, feat-writing-lab-a-proposals-editor]
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +42,12 @@ jobs:
         run: python3 tests/browser_v8.py
       - name: 'Writing Lab A — Chromium: proposta, rascunho e recuperação'
         run: python3 tests/essay_lab_browser.py
+      - name: Essay B1 — secure backend contract and mocked API
+        run: |
+          node --check supabase/functions/academy-essay-assess/assessment-policy.mjs
+          node --check supabase/functions/academy-essay-assess/gateway.mjs
+          node --check --input-type=module < supabase/functions/academy-essay-assess/index.ts
+          node tests/essay_b1_backend.test.mjs
       - name: Public questionnaire demo browser test
         run: python3 tests/browser_demo.py
 
