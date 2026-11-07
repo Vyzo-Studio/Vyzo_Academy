@@ -57,7 +57,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 | 11 — Busca inteligente de exames | PARCIALMENTE IMPLEMENTADO | V10 tem busca e fallback manual; sugestão local confiável do ENEM; seleção assistida testada em mock. | Auth/API real, índices/catálogos de edições verificados e cache. |
 | 12 — Pesquisa oficial com IA | BLOQUEADO POR INFRAESTRUTURA | Gateway V10 `academy-exam-research` implantado com JWT; PR #10 aberto; nenhum uso real validado. | Homologar Auth, budgets/secrets, teste E2E com provedor e revisão das fontes. |
 | 13 — Leitor inteligente de editais | NÃO IMPLEMENTADO | Não há leitor de PDF/extração por páginas e validação de retificações integrado. | Projetar pipeline confiável, permissões e amostras de editais oficiais. |
-| 14 — Acervo de provas anteriores | PARCIALMENTE IMPLEMENTADO | `main` oferece índice oficial do Inep; PR #3 tem links mais específicos ainda não integrados. | Validar links e licenças; distinguir PDF externo de questões convertidas. |
+| 14 — Acervo de provas anteriores | PARCIALMENTE IMPLEMENTADO | Lote V16 PR #15 reutiliza catálogo `academy/v15-official-papers.mjs`: dois pares prova/gabarito de 2024 encontrados no índice oficial do Inep, adicionados à página V9 com fallback para anos sem URLs; PDFs não puderam ser abertos/verificados (502/timeout). | Curadoria de outras edições e formatos, revisão dos arquivos e possível conversão de itens somente com licenças e QA adequados. |
 | 15 — Análise das bancas | NÃO IMPLEMENTADO | Não há análise empírica verificável de padrão/incidência por banca no código publicado. | Construir corpus por edição após acervo oficial. |
 | 16 — Preparação automática a partir do edital | PARCIALMENTE IMPLEMENTADO | V9/V14 geram objetivo/diagnóstico/plano local a partir de informações inseridas pelo estudante. | Vincular edital e disciplinas verificados, sem declarar metas específicas sem fontes. |
 | 17 — Atualização de informações oficiais | NÃO IMPLEMENTADO | Sem job agendado de retificações/monitoramento e alertas reais. | Ingestão e execução recorrente verificável, confirmação antes de alterações. |
@@ -100,6 +100,15 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 | 34 — Piloto controlado | NÃO IMPLEMENTADO | Não há participantes reais e jornadas homologadas documentadas; 0 usuários Auth no projeto. | Após segurança/contas, autorizar piloto restrito. |
 | 35 — Infraestrutura definitiva | PARCIALMENTE IMPLEMENTADO | GitHub Pages e CI aprovados, Supabase exclusivo saudável; sem domínio personalizado verificado nem backup operacional. | Separar homologação/produção, DNS, observabilidade, restore e orçamento autorizado. |
 | 36 — Homologação e lançamento | BLOQUEADO POR SEGURANÇA OU PRIVACIDADE | Dependências de Auth, menores, conteúdos e IA real ainda impedem anúncio universal. | Aprovar gates, QA E2E e protocolo de reversão antes do lançamento. |
+
+## Lotes V16 — execução progressiva
+
+| Lote | Escopo | Referências | Estado |
+|---|---|---|---|
+| 01 | Consolidar documentação auditada de 36 módulos | PR #14, merge `51ea40d`, CI `42403835667` PASS | CONCLUÍDO E VALIDADO (documentação) |
+| 02 | Fonte oficial de provas ENEM 2024 na jornada V9 sem PDF convertido | PR #15, `v15-official-papers.mjs`, `v9.mjs`, testes Node e Chromium, workflow `42407086686` (commit `6186995`) | CI E REGRESSÕES APROVADOS; PDFs externos não acessíveis nesta auditoria; cobertura continua parcial |
+
+Observação: “implementado” significa código na branch; serviço externo não verificado permanece não homologado. Atualizar a tabela após o check final.
 
 ## Diferenças, sobreposições e conflitos
 

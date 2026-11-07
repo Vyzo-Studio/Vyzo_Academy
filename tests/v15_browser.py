@@ -66,6 +66,12 @@ with sync_playwright() as p:
         expect(page.get_by_role('heading',name='Provas anteriores')).to_be_visible()
         page.locator('#v15-past-year').select_option('2024')
         expect(page.locator('#v15-past-selection')).to_contain_text('2024')
+        assert page.locator('#v15-past-direct a:has-text("Abrir prova (PDF oficial)")').count()==2
+        assert page.locator('#v15-past-direct a:has-text("Abrir gabarito (PDF oficial)")').count()==2
+        assert page.locator('#v15-past-direct').get_by_text('Não convertido em simulado interativo.').count()==2
+        page.locator('#v15-past-year').select_option('2025')
+        assert page.locator('#v15-past-direct a').count()==0
+        expect(page.locator('#v15-past-direct')).to_contain_text('Não cadastramos links diretos')
         assert 'gov.br/inep' in page.get_by_role('link',name='Abrir provas e gabaritos oficiais no Inep').get_attribute('href')
         assert not errors,(width,errors)
         print('PASS V15 Chromium:',stage,grade,width,'px, escola sem banca, histórico, acervo oficial')
