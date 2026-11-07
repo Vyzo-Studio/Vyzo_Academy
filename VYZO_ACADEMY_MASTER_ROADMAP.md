@@ -167,6 +167,16 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `tests/v10_research.test.mjs`: casos de fronteira para consulta longa, normalização de espaços e entradas não confiáveis.
 - Sem chamada paga, sem alteração dos perfis públicos ou do banco; o backend V10 segue bloqueado até a homologação da autenticação e da IA.
 
+## V16.2 — Lote A1: autenticação reconciliada em pré-produção
+
+- **Branch:** `feat-v16-2-auth-reconciliation-preprod` criada da `main` `c94ddd3`, sem habilitar contas públicas.
+- O `academy/app.mjs` da `main` era idêntico ao ancestral comum do PR #8, permitindo portar seus ajustes de sessão, recuperação e isolamento sem apagar mudanças atuais. Os módulos `v12-auth-core.mjs`, `cloud-snapshot.mjs`, `account-import.mjs` e `v9-cloud-gate.mjs` foram portados para a branch de homologação.
+- `academy/v9.mjs` foi conciliado **por alterações pontuais**, preservando o acervo do Inep, o currículo e as correções recentes. A tela V9 cloud usa o HTML acessível e navegação da `main`, não o template antigo.
+- Autorização: `isVerifiedStudent` exige e-mail confirmado, conta não anônima e flag `app_metadata.academy_adult_verified=true` fornecida por operador autorizado. `user_metadata` NÃO concede acesso. Isso não substitui verificação jurídica/real de idade nem substitui RLS no banco.
+- `academy/config.js` permanece **com URL e chave vazias** e `registrationEnabled:false`; o gatilho de registro do Supabase dedicado segue desligado.
+- CI independente `stage03-preproduction.yml` valida componentes e testes com mocks; exige que o gate público V16 continue rejeitando os módulos não homologados. **Não é autorização de deploy.**
+- **Pendente:** teste com duas contas adultas realmente confirmadas, isolamento HTTP/JWT, checagem de URLs de callback e e-mail, revisão das políticas RLS com autorização etária, backup/restore real e integração segura à `main`.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
