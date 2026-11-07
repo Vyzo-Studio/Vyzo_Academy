@@ -154,6 +154,13 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `tests/v10_research.test.mjs` contém testes adversariais. O frontend público segue fallback manual sem habilitar autenticação/IA ou serviço pago.
 - **Bloqueio mantido:** pesquisa real com provedor/edital não homologada; referências institucionais ainda exigem verificação do conteúdo.
 
+## Lote V16 — Prontidão operacional e documentação da V16 (Módulos 02 e 36)
+
+- `README.md`: status de produção atualizado; distingue infraestrutura Supabase existente de contas/IA públicas ainda bloqueadas.
+- `V16_PRODUCTION_READINESS_ASSESSMENT.md`: evidências, dependências e critérios obrigatórios de segurança, conteúdo, QA e lançamento.
+- PR #23 (gate de release) e PR #26 (segurança de fontes e datas) foram integrados à `main` com CI aprovado; esta atualização preserva os checkpoints anteriores.
+- **Conclusão geral: NÃO PRONTO para lançamento universal**; segue possível operar as funcionalidades locais existentes dentro de suas limitações. Nenhum recurso pago, conta infantil ou autenticação foi ativado.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
