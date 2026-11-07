@@ -4,9 +4,15 @@
 
 **Site:** https://vyzo-studio.github.io/Vyzo_Academy/
 
-A evolução V14 amplia a jornada de estudos local com edição e arquivamento seguro de provas, taxonomia de disciplinas, avaliações focadas, calendário com disponibilidade por dia, cronômetros, biblioteca do banco autoral e revisão de erros. Consulte [V14_RELEASE_NOTES.md](./V14_RELEASE_NOTES.md).
+## Estado atual do projeto — V16 (07/11/2026)
 
-**Estado real da infraestrutura:** o login obrigatório, a sincronização em nuvem, pesquisa de concursos com IA e tutoria real ainda **não estão operacionais no site publicado**. A preparação de autenticação V12 está isolada na branch `v12-auth-gateway-preproduction` e depende de banco Supabase exclusivo, confirmação de e-mail, testes RLS entre estudantes diferentes e migração segura de históricos. A V14 não apaga os dados locais anteriores.
+A versão **publicada** contém o simulador clássico, a jornada local V9, avanços V13/V14/V15 em currículo e diagnósticos, PWA limitada e links oficiais do acervo ENEM 2024. O banco de 224 questões é **autoral**, e a revisão aritmética automatizada cobre apenas parte dele. O funcionamento visual não comprova cobertura curricular universal.
+
+**Infraestrutura existe, mas não está liberada no site:** há Supabase **exclusivo da Academy** com esquema, RLS e migrações; a `academy/config.js` da `main` mantém URL/chave públicas vazias, não existem contas de alunos ativas e o bloqueio de cadastro permanece fechado. Uma Edge Function de pesquisa está implantada com JWT obrigatório, mas a integração com provedor pago e autenticação real **não foi homologada**. O laboratório de redação avançado e o corretor de IA estão somente em PRs de pré-produção; não existe correção individual por IA operacional no site público.
+
+**Segurança e privacidade:** não abrir inscrições, contas de menores ou serviços com custo até homologação de idade/consentimento, e-mails reais, sessões A/B, backups e quotas. A `main` preserva as chaves de dados locais existentes. Não inserir segredos no navegador. GitHub Pages e testes automatizados não substituem auditoria humana de produção.
+
+Consulte a [matriz dos 36 módulos](./VYZO_ACADEMY_MASTER_ROADMAP.md), o [relatório operacional V16](./V16_EXECUTION_REPORT_20261107.md) e as [notas da V14](./V14_RELEASE_NOTES.md). O conteúdo abaixo é histórico e descreve entregas anteriores, não o status integral da V16.
 
 ---
 
