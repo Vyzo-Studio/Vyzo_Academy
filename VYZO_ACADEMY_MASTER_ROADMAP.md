@@ -139,6 +139,14 @@ Observação: “implementado” significa código na branch; serviço externo n
 - Cobertura matemática automatizada total: **72 de 224**; banco restante e enunciados repetidos aguardam curadoria humana e QA específico. Questões não são oficiais do Inep e não devem ser anunciadas como tal.
 - O teste aritmético não comprova adequação à BNCC, estilo ENEM, clareza didática ou ausência de ambiguidade.
 
+## Lote V16 — Gate de segurança do release público (Módulos 02, 32 e 33)
+
+- Branch `feat-v16-release-security-ci-gate`, criada sobre a `main` em `869f149e7ca9c4dea36e3569f391c1ff89c831e8`. PR e CI registrados no checkpoint do lote.
+- `tests/v16_release_security_gate.test.mjs`: novo contrato **estático** de segurança para evitar inclusão acidental dos módulos de autenticação, aulas escolares não homologadas e corretor de redação, além de detectar segredos em arquivos públicos, manter o V9 local/legado e impedir o Service Worker de interceptar rotas privadas.
+- `.github/workflows/pages.yml`: adiciona o gate cedo na pipeline, antes de regressões extensas. O teste deve permanecer aplicável à `main` pública ainda sem contas.
+- Não integra os PRs #8/#10/#12/#13/#16/#18, não ativa contas, IA ou cadastro infantil, não altera Supabase nem o código-fonte de questões.
+- **Limitação:** teste estático de release não valida identidade real, proteção de idade, RLS em HTTP, provedor pago nem conformidade jurídica; preservar os bloqueios dos Módulos 04/06/12/21/36.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
