@@ -47,7 +47,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 |---|---|---|---|
 | 07 — Estrutura curricular | PARCIALMENTE IMPLEMENTADO | `curriculum-taxonomy.mjs` e etapas/disciplinas V15 na `main`; falta cobertura comprovada de habilidades BNCC por ano. | Verificação documental/editorial por série; integrar apenas parte segura dos PRs. |
 | 08 — Conteúdos e aulas | BLOQUEADO POR CONTEÚDO EDUCACIONAL | Microcatálogo V15.1 de 3 aulas/18 questões no PR #5, marcado `em_revisao`, não publicado na `main`. | Curadoria humana e ampliação progressiva; proteger experiência para menores. |
-| 09 — Banco profissional de questões | PARCIALMENTE IMPLEMENTADO | Banco autoral ENEM e testes de gabarito; V14 indica 144 itens/22 grupos ainda exigindo curadoria completa. | Revisão editorial item a item, origem, duplicatas e classificação por tópico. |
+| 09 — Banco profissional de questões | PARCIALMENTE IMPLEMENTADO | Banco autoral ENEM com 224 itens (64 originais, 144 complementares, 16 avançados); lote V16 PR #17 corrige explicação de V4009 (18/4=4,5, não 4) sem mudar alternativa/gabarito e adiciona QA aritmético para 24 questões. Existem 22 grupos de enunciados padronizados a revisar editorialmente. | Curadoria humana integral, diferenciação de questões semelhantes, verificação de conteúdo/fonte e testes matemáticos dos demais tópicos. |
 | 10 — Diagnósticos personalizados | PARCIALMENTE IMPLEMENTADO | V9/V13/V14 possuem ENEM, exames focados, 30 questões em teste; escola bloqueada sem itens validados. | Diagnósticos reais por série/edital dependem de conteúdo e matrizes compatíveis. |
 
 ### FASE 3 — VYZO Exam Intelligence
@@ -109,6 +109,12 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 | 02 | Fonte oficial de provas ENEM 2024 na jornada V9 sem PDF convertido | PR #15, `v15-official-papers.mjs`, `v9.mjs`, testes Node e Chromium, workflow `42407086686` (commit `6186995`) | CI E REGRESSÕES APROVADOS; PDFs externos não acessíveis nesta auditoria; cobertura continua parcial |
 
 Observação: “implementado” significa código na branch; serviço externo não verificado permanece não homologado. Atualizar a tabela após o check final.
+
+## Lote pedagógico V16 — Questões autorais
+
+- **PR #17:** correção matemática no cálculo explicado de V4009; resposta correta (45) e ID preservados. Código fonte e `index.html` compilado coerentes.
+- `tests/v16_quantitative_bank.test.mjs`: valida gabaritos e cálculos de oito itens por grupo (porcentagens, proporcionalidade direta e médias aritméticas). CI adicionado. Apenas os 24 itens cobertos possuem esta evidência específica; não equivale à revisão humana do banco de 224 questões.
+- **Status do Módulo 09 permanece PARCIALMENTE IMPLEMENTADO**.
 
 ## Diferenças, sobreposições e conflitos
 
