@@ -10,7 +10,8 @@ const MAX_BYTES=3_000_000;
 const EMAIL=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function isVerifiedStudent(user){
   return Boolean(user&&typeof user.id==='string'&&user.id.length>0&&
-   EMAIL.test(String(user.email||''))&&Boolean(user.email_confirmed_at)&&user.is_anonymous!==true);
+   EMAIL.test(String(user.email||''))&&Boolean(user.email_confirmed_at)&&
+   user.is_anonymous!==true&&user.app_metadata?.academy_adult_verified===true);
 }
 export async function getVerifiedStudent(client){
   if(!client?.auth?.getUser)throw Error('Provedor de autenticação indisponível.');
