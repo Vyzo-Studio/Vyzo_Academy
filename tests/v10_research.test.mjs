@@ -39,7 +39,7 @@ let invoked=false;
 const createClient=()=>({auth:{getUser:async()=>({data:{user:{id:'u-1',email_confirmed_at:'2026-11-05'}},error:null})},functions:{invoke:async function(name,args){invoked=true;assert.equal(name,'academy-exam-research');assert.equal(args.body.query,'ENEM');return {data:raw,error:null};}}});
 const ok=await searchExams('ENEM',{config:cfg,createClient});assert(invoked);assert.equal(ok.candidates.length,1);
 await assert.rejects(()=>searchExams('ENEM',{config:cfg,createClient:()=>({auth:{getUser:async()=>({data:{user:null},error:null})}})}),/Entre na sua conta/);
-const fn=readFileSync(new URL('../supabase/functions/academy-exam-research/index.ts',import.meta.url),'utf8');
+const fn=['index.ts','gateway.mjs','research-policy.mjs'].map(file=>readFileSync(new URL('../supabase/functions/academy-exam-research/'+file,import.meta.url),'utf8')).join('\n');
 for(const key of ['OPENAI_API_KEY','OPENAI_RESEARCH_MODEL','academy_research_requests','/auth/v1/user',"type:'web_search'",'annotatedSources','ALLOWED_ORIGINS','Deno.serve'])assert(fn.includes(key),`Proteção ausente: ${key}`);
 assert(!/sk-[a-zA-Z0-9]{20,}/.test(fn));
 const sql=readFileSync(new URL('../supabase/migrations/202611050002_vyzo_academy_research.sql',import.meta.url),'utf8');

@@ -17,6 +17,9 @@ const absent=[
 for(const file of absent)
  assert.equal(existsSync(new URL(file,root)),false,'Public release includes unapproved module: '+file);
 
+assert.doesNotMatch(read('supabase/functions/academy-exam-research/index.ts'),
+ /from\\s*['\"]\\.\\/gateway\\.mjs['\"]/u,
+ 'Modular AI gateway must remain on a preproduction branch until live Auth, provider and quota are homologated');
 const config=read('academy/config.js');
 assert.match(config,/url:\s*''/u,'Public Auth URL must remain empty until homologated.');
 assert.match(config,/publishableKey:\s*''/u,'Public Auth key must remain empty until homologated.');

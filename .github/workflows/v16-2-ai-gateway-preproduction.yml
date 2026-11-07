@@ -1,0 +1,30 @@
+name: V16.2 AI Gateway Preproduction (no deploy)
+on:
+  push:
+    branches:
+      - feat-v16-2-research-gateway-hardening
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-preproduction:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate modular gateway and quota contract
+        run: |
+          node --check supabase/functions/academy-exam-research/gateway.mjs
+          node --check supabase/functions/academy-exam-research/research-policy.mjs
+          node --check --input-type=module < supabase/functions/academy-exam-research/index.ts
+          node tests/block02_ai_gateway.test.mjs
+          node tests/v10_research.test.mjs
+      - name: Preserve public release constraints
+        run: |
+          if node tests/v16_release_security_gate.test.mjs; then
+            echo 'Unexpected public gate result: staged AI gateway must stay unpublished.'
+            exit 1
+          fi
+          echo 'PASS: staged AI code remains excluded from release.'
