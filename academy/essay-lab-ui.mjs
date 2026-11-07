@@ -160,8 +160,12 @@ export function renderWritingEditor(root,essay,{canAssess=false}={}){
   btn('Baixar texto','essay-export',null,'btn ghost'),
   btn('Voltar às redações','essay-list',null,'btn ghost'));
  if(p&&mode==='treino'){
-  if(canAssess)actions.append(btn('CORRIGIR MINHA REDAÇÃO','essay-assess',null,'btn'));
-  else editing.append(el('p','A correção por IA exige uma conta adulta homologada e liberação expressa do serviço. Seu rascunho permanece disponível sem IA.','essay-warning-small'));
+  if(canAssess){
+   actions.append(btn('CORRIGIR MINHA REDAÇÃO','essay-assess',null,'btn'));
+   const state=el('p','Correção com IA disponível somente após autorização do servidor. O texto será salvo antes do envio.','small muted');
+   state.id='essay-assess-status';state.role='status';state.setAttribute('aria-live','polite');
+   editing.append(state);
+  }else editing.append(el('p','A correção por IA exige uma conta adulta homologada e liberação expressa do serviço. Seu rascunho permanece disponível sem IA.','essay-warning-small'));
  }
  editing.append(actions);
  const versions=el('section',null,'essay-versions');
