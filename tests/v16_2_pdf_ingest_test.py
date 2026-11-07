@@ -42,6 +42,7 @@ class NoticeTests(unittest.TestCase):
             "https://www.gov.br.evil.invalid/edital",
             "https://user:password@gov.br/edital",
             "https://gov.br:9999/edital",
+            "https://gov.br:porta-invalida/edital",
             "https://gov.br/%2e%2e/edital",
             "https://gov.br/um/../edital",
             "https://gov.br/%2f/edital",
