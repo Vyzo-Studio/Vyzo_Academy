@@ -14,9 +14,10 @@ self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise
   k.startsWith('vyzo-academy-shell-'))&&k!==CACHE).map(k=>caches.delete(k))))));
 self.addEventListener('fetch',e=>{
  const url=new URL(e.request.url);
- if(e.request.method!=='GET'||url.origin!==self.location.origin)return;
- // Portal V8/V9, suas contas, arquivos e chamadas privadas não passam pelo cache.
- if(/\/academy(?:\/|$)/.test(url.pathname))return;
+ if(e.request.method!=='GET'||url.origin!==self.location.origin||
+   !url.pathname.startsWith(BASE.pathname))return;
+ // Portal V8/V9, contas, APIs e chamadas privadas NUNCA passam pelo cache.
+ if(/\/(?:academy|api|auth|rest|functions)(?:\/|$)/.test(url.pathname))return;
  if(e.request.mode==='navigate'){
   const entry=isClassicEntry(url);
   e.respondWith(fetch(e.request).then(response=>{
