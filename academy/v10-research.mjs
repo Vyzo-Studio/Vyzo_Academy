@@ -6,9 +6,20 @@ export const OFFICIAL_DOMAINS=[
 ];
 const typeNames=new Set(['ENEM','Vestibular','Concurso público','Concurso militar','Certificação profissional','Prova escolar','Outra prova']);
 const clean=(x,max=160)=>typeof x==='string'?x.trim().replace(/\s+/g,' ').slice(0,max):'';
+const realCalendarDay=date=>{
+ if(typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date))return false;
+ const parsed=new Date(date+'T12:00:00.000Z');
+ return Number.isFinite(parsed.getTime())&&parsed.toISOString().slice(0,10)===date;
+};
 export function validQuery(query){const q=clean(query,150);if(q.length<3||q.length>150)throw Error('Digite pelo menos três caracteres para pesquisar uma prova.');return q;}
 export function officialUrl(raw){
- try {const url=new URL(String(raw));if(url.protocol!=='https:'||url.username||url.password||url.port&&url.port!=='443')return null;
+ try {
+ const text=String(raw);
+ // Reject encoded traversal/ambiguous paths before URL() normalizes them.
+ const rawPath=text.replace(/^https:\/\/[^/?#]+/i,'').split(/[?#]/,1)[0];
+ if(/(?:%2e|%2f|%5c|\\|\/\.\.?\/|\/\/)/i.test(rawPath))return null;
+ const url=new URL(text);
+ if(url.protocol!=='https:'||url.username||url.password||url.port&&url.port!=='443')return null;
  const host=url.hostname.toLowerCase();if(!OFFICIAL_DOMAINS.some(d=>host===d||host.endsWith('.'+d)))return null;
  if(/(?:\/\.\.|%2e%2e|\\)/i.test(url.pathname))return null;
  url.hash='';return url.href;
@@ -24,7 +35,7 @@ export function normalizeResearch(raw){
   const type=typeNames.has(item.examType)?item.examType:'Outra prova';
   const name=clean(item.name,110);if(name.length<3)continue;
   const subjects=(Array.isArray(item.subjects)?item.subjects:[]).map(x=>clean(x,90)).filter(Boolean).slice(0,30);
-  const date=typeof item.examDate==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(item.examDate)&&!Number.isNaN(new Date(item.examDate+'T12:00:00').valueOf())?item.examDate:null;
+  const date=realCalendarDay(item.examDate)?item.examDate:null;
   out.push({name,type,institution:clean(item.institution,110),position:clean(item.position,110),board:clean(item.board,110),edition:clean(item.edition,60),examDate:date,subjects,provisional:type!=='ENEM',sources,sourceStatus:'Fontes oficiais vinculadas; confirme o edital antes de usar',researchDate:clean(raw.researchedAt||new Date().toISOString(),40),noticeAnalyzed:false,sourceVersion:clean(raw.researchVersion||'v10',30)});
  }
  return {candidates:out,researchedAt:clean(raw.researchedAt||'',40)};
