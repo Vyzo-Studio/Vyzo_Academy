@@ -167,6 +167,16 @@ Observação: “implementado” significa código na branch; serviço externo n
 - `tests/v10_research.test.mjs`: casos de fronteira para consulta longa, normalização de espaços e entradas não confiáveis.
 - Sem chamada paga, sem alteração dos perfis públicos ou do banco; o backend V10 segue bloqueado até a homologação da autenticação e da IA.
 
+## V16.2 — Lote A2: gateway de pesquisa com reserva privilegiada (pré-produção)
+
+- Reconciliados o `gateway.mjs`, `research-policy.mjs` e o `index.ts` do PR #10 em branch própria, mantendo o cliente V10 público já corrigido no PR #28.
+- API modular exige identidade verificada no Auth, aprovação em `app_metadata.academy_ai_research_allowed` e `academy_adult_verified`, sem confiar em `user_metadata`.
+- Migração aditiva `202611070007_research_service_only_quota.sql` retira o `EXECUTE` de `authenticated` da RPC `SECURITY DEFINER` legada e cria reserva de quota por `service_role` com verificação administrativa independente, 6/dia e 2/min. **A migração NÃO foi aplicada permanentemente.**
+- Teste PostgreSQL real com `BEGIN/ROLLBACK` validou: `authenticated` bloqueado, `service_role` permitido para conta aprovada, quota 2/min e conta não aprovada negada. `auth.users` e o cadastro real permanecem inalterados.
+- Testes Node/mocks e CI isolado não acionam provedor pago. É obrigatória implantação **atômica** do gateway novo com a migração após homologação, evitando quebra da RPC antiga sem atualizar o endpoint.
+- Bloqueios: contas adultas reais, orçamento e credenciais autorizadas, configuração de Auth/HTTP e E2E com provedor, teste de fontes realmente verificadas e auditoria de produção.
+- Gate do release público foi reforçado **na branch de homologação**, para que o `index.ts` modular de IA não seja confundido com implementação pronta para uso público.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
