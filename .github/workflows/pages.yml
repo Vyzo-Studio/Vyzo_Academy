@@ -54,6 +54,7 @@ jobs:
           node --check academy/app.mjs
           node --check academy/essay-lab-ui.mjs
           node tests/essay_b2_client.test.mjs
+          python3 tests/essay_b2_browser.py
       - name: Public questionnaire demo browser test
         run: python3 tests/browser_demo.py
 
