@@ -147,6 +147,13 @@ Observação: “implementado” significa código na branch; serviço externo n
 - Não integra os PRs #8/#10/#12/#13/#16/#18, não ativa contas, IA ou cadastro infantil, não altera Supabase nem o código-fonte de questões.
 - **Limitação:** teste estático de release não valida identidade real, proteção de idade, RLS em HTTP, provedor pago nem conformidade jurídica; preservar os bloqueios dos Módulos 04/06/12/21/36.
 
+## Lote V16 — Transparência operacional e avaliação de lançamento (Módulos 02 e 36)
+
+- `README.md`: retrato atual da `main` e dos serviços. Corrige documentação antiga que afirmava inexistência de Supabase, distinguindo backend dedicado de funcionalidades realmente publicadas.
+- `V16_PRODUCTION_READINESS_ASSESSMENT.md`: matriz de liberação com evidências, bloqueios de Auth/IA/menores, QA, recuperação, conteúdo e acessibilidade.
+- O lançamento universal **não está aprovado**; documentação e relatório não alteram funcionalidades, infraestrutura ou permissões, e não constituem teste operacional.
+- Lotes independentes de hardening: PR #23 adiciona gate automatizado de release público (integrado após CI); PR #24 endurece URLs e datas da pesquisa V10 (aguardando CI/integração). Não inferir que a IA esteja ativada.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
