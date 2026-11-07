@@ -139,6 +139,13 @@ Observação: “implementado” significa código na branch; serviço externo n
 - Cobertura matemática automatizada total: **72 de 224**; banco restante e enunciados repetidos aguardam curadoria humana e QA específico. Questões não são oficiais do Inep e não devem ser anunciadas como tal.
 - O teste aritmético não comprova adequação à BNCC, estilo ENEM, clareza didática ou ausência de ambiguidade.
 
+## Lote V16 — Integridade de fontes na pesquisa de provas (Módulos 11, 12 e 33)
+
+- `academy/v10-research.mjs`: endurece a verificação cliente de URLs institucionais contra normalização antecipada de caminho (`%2e`, `%2f`, `%5c`, `/../` e `//`), mantendo apenas HTTPS e domínios explicitamente previstos.
+- Valida datas de calendário por reconstrução UTC: datas impossíveis como `2026-02-31` tornam-se **não confirmadas**, em vez de serem apresentadas como datas oficiais. Mantém datas válidas e os campos já suportados.
+- `tests/v10_research.test.mjs` cobre ataques e datas inválidas. O frontend de produção segue em fallback manual, sem ativar Auth/IA e sem prometer precisão oficial.
+- **Permanece parcial:** o backend V10 não foi conectado ao usuário final nem testado com provedor real; não substitui curadoria de editais nem fontes completas.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
