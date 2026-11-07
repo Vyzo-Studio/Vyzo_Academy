@@ -47,7 +47,7 @@ Estados permitidos: **CONCLUÍDO E VALIDADO**, **IMPLEMENTADO, AGUARDANDO HOMOLO
 |---|---|---|---|
 | 07 — Estrutura curricular | PARCIALMENTE IMPLEMENTADO | `curriculum-taxonomy.mjs` e etapas/disciplinas V15 na `main`; falta cobertura comprovada de habilidades BNCC por ano. | Verificação documental/editorial por série; integrar apenas parte segura dos PRs. |
 | 08 — Conteúdos e aulas | BLOQUEADO POR CONTEÚDO EDUCACIONAL | Microcatálogo V15.1 de 3 aulas/18 questões no PR #5, marcado `em_revisao`, não publicado na `main`. | Curadoria humana e ampliação progressiva; proteger experiência para menores. |
-| 09 — Banco profissional de questões | PARCIALMENTE IMPLEMENTADO | Banco autoral ENEM com 224 itens (64 originais, 144 complementares, 16 avançados); lote V16 PR #17 corrige explicação de V4009 (18/4=4,5, não 4) sem mudar alternativa/gabarito e adiciona QA aritmético para 24 questões. Existem 22 grupos de enunciados padronizados a revisar editorialmente. | Curadoria humana integral, diferenciação de questões semelhantes, verificação de conteúdo/fonte e testes matemáticos dos demais tópicos. |
+| 09 — Banco profissional de questões | PARCIALMENTE IMPLEMENTADO | Banco autoral ENEM com 224 itens (64 originais, 144 complementares, 16 avançados); PR #17 corrigiu explicação de V4009 sem mudar ID ou gabarito; PR #22 acrescenta verificações matemáticas para mais 48 questões (total 72/224) em 12 grupos de tópicos, usando dados dos enunciados. O teste verifica coerência aritmética, NÃO qualidade editorial integral. Existem 22 grupos de enunciados padronizados a revisar editorialmente. | Curadoria humana integral, diferenciação de questões semelhantes, verificação de conteúdo/fonte e testes matemáticos dos demais tópicos. |
 | 10 — Diagnósticos personalizados | PARCIALMENTE IMPLEMENTADO | V9/V13/V14 possuem ENEM, exames focados, 30 questões em teste; escola bloqueada sem itens validados. | Diagnósticos reais por série/edital dependem de conteúdo e matrizes compatíveis. |
 
 ### FASE 3 — VYZO Exam Intelligence
@@ -132,6 +132,12 @@ Observação: “implementado” significa código na branch; serviço externo n
 - PR #20: `sw.js` com nova versão de cache e fallback restrito ao índice clássico. Páginas como privacidade/termos não devem sobrescrever a versão offline do simulador e não devem servir a interface errada quando estiverem offline.
 - Proteção explícita de `/academy`, `/api`, `/auth`, `/rest`, `/functions` e páginas fora do escopo; `POST` e outras origens permanecem sem interceptação.
 - `tests/v16_pwa_cache.test.mjs` simula eventos sem dados pessoais; não substitui testes de instalação real em mobile.
+
+## Lote adicional — ampliação do QA curricular e matemático
+
+- **PR #22:** 48 questões autorais adicionais auditadas computacionalmente: geometria plana, velocidade média, probabilidade, Lei de Ohm, fluxo de energia, concentração, densidade, calor sensível e escala de pH.
+- Cobertura matemática automatizada total: **72 de 224**; banco restante e enunciados repetidos aguardam curadoria humana e QA específico. Questões não são oficiais do Inep e não devem ser anunciadas como tal.
+- O teste aritmético não comprova adequação à BNCC, estilo ENEM, clareza didática ou ausência de ambiguidade.
 
 ## Diferenças, sobreposições e conflitos
 
