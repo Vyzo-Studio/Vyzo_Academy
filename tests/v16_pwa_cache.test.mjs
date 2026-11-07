@@ -65,6 +65,8 @@ assert.equal(dir.status,200);assert.equal(saved.length,2);
 const before=fetched.length;
 assert.equal(await dispatch(SCOPE+'academy/index.html'),null,'Cloud auth routes must bypass SW.');
 assert.equal(await dispatch(SCOPE+'academy/v9.html'),null,'Local portal must bypass SW.');
+assert.equal(await dispatch(SCOPE+'api/private'),null,'Same-scope API must bypass SW.');
+assert.equal(await dispatch(SCOPE+'auth/v1/user'),null,'Auth endpoints must bypass SW.');
 assert.equal(await dispatch(ORIGIN+'/otherproject/index.html'),null,'Outside scope should not be intercepted.');
 
 assert.equal(await dispatch('https://api.openai.com/v1/responses'),null);
