@@ -5,6 +5,25 @@ assert.equal(validQuery('  Quero estudar para o Banco do Brasil  '),'Quero estud
 assert.throws(()=>validQuery('A'));
 assert.equal(officialUrl('https://www.gov.br/inep/pt-br/areas-de-atuacao'), 'https://www.gov.br/inep/pt-br/areas-de-atuacao');
 for(const u of ['http://www.gov.br/','https://www.gov.br.evil.net/','https://evil.example/','javascript:alert(1)','https://user:pass@www.gov.br/'])assert.equal(officialUrl(u),null,u);
+// V16: URL() can normalize traversal before a naive pathname check; reject before parsing.
+for(const u of ['https://www.gov.br/%2e%2e/secret','https://www.gov.br/a/%2fadmin',
+ 'https://www.gov.br/a/%5cadmin','https://www.gov.br/a/../index',
+ 'https://www.gov.br//inep','https://www.gov.br:999/inep'])
+ assert.equal(officialUrl(u),null,'Encoded or normalized path accepted: '+u);
+assert.equal(officialUrl('https://www.gov.br/inep/edital?ano=2026#secao'),
+ 'https://www.gov.br/inep/edital?ano=2026');
+const edgeDates=['2026-02-29','2026-02-31','2026-13-10','2026-00-01','2026-04-31'];
+for(const invalid of edgeDates){
+ const item=normalizeResearch({candidates:[{
+  name:'Exame sem data confirmada',examType:'ENEM',examDate:invalid,
+  sources:[{url:'https://www.gov.br/inep'}]
+ }]});
+ assert.equal(item.candidates[0].examDate,null,'Invalid calendar date published: '+invalid);
+}
+assert.equal(normalizeResearch({candidates:[{
+ name:'Exame com data válida',examType:'ENEM',examDate:'2028-02-29',
+ sources:[{url:'https://www.gov.br/inep'}]
+}]}).candidates[0].examDate,'2028-02-29');
 const raw={candidates:[{name:'Exame exemplo (apenas teste)',examType:'ENEM',board:'',examDate:'2026-11-08',sources:[{url:'https://www.gov.br/inep',title:'Fonte oficial de exemplo'}],subjects:['Matemática','Linguagens']},{name:'Candidato sem fonte',examType:'Outra prova',sources:[{url:'https://site-sem-fonte.example'}]}]};
 const parsed=normalizeResearch(raw);assert.equal(parsed.candidates.length,1);assert.equal(parsed.candidates[0].name,'Exame exemplo (apenas teste)');assert.equal(parsed.candidates[0].noticeAnalyzed,false);
 assert.equal(parsed.candidates[0].subjects.length,2);
