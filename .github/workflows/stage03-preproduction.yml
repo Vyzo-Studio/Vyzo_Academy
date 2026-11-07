@@ -28,6 +28,10 @@ jobs:
           node tests/v9_core.test.mjs
           node tests/v15_pathways.test.mjs
           node tests/v10_research.test.mjs
+      - name: Real two-user Auth test (explicitly opt-in, skipped without credentials)
+        run: |
+          node --check tests/v16_2_auth_e2e_existing_users.mjs
+          node tests/v16_2_auth_e2e_existing_users.mjs
       - name: Confirm release is blocked
         run: |
           if node tests/v16_release_security_gate.test.mjs; then
