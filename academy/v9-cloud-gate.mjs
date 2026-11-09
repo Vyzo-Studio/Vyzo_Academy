@@ -1,5 +1,6 @@
 /** Inicializador V9 cloud: conteúdo privado só é carregado após auth.getUser() real. */
 import {isVerifiedStudent} from './v12-auth-core.mjs';
+import {inspectCloudCache,adoptCloudCache} from './v9-cloud-recovery.mjs';
 const cfg=window.VYZO_ACADEMY_CLOUD||{};
 const url='https://cfrlqinzsysoqcduqftd.supabase.co';
 const configured=cfg.url===url&&/^sb_publishable_[a-zA-Z0-9_-]+$/.test(cfg.publishableKey||'');
@@ -21,16 +22,42 @@ else{
    const {data:remote,error:readError}=await client.from('academy_private_records')
     .select('payload,revision').eq('user_id',user.id).eq('record_key','v9_current_state').maybeSingle();
    if(readError)throw readError;
-   let version=remote?.revision??0,invalid=false;
+   let version=remote?.revision??0;
    if(remote){
     const p=remote.payload;
-    if(p?.schema!==9||!Array.isArray(p.goals)||!Array.isArray(p.assessments)||!Array.isArray(p.tasks))throw Error('Snapshot remoto incompatível: preserve o backup, sem sobrescrever.');
+    if(p?.schema!==9||!Array.isArray(p.goals)||!Array.isArray(p.assessments)||!Array.isArray(p.tasks))
+     throw Error('Snapshot remoto incompatível: preserve o backup, sem sobrescrever.');
+    const decision=inspectCloudCache(localStorage.getItem(scopedKey),p);
+    if(decision.action==='conflict'){
+     view.innerHTML='<section class="v9-card" role="status"><h1>Duas versões da sua jornada</h1>'
+      +'<p>Há progresso salvo neste navegador que é diferente da sua versão na nuvem. '
+      +'Nada será substituído automaticamente. Baixe uma cópia local antes de escolher a versão da nuvem.</p>'
+      +'<div class="v9-actions"><button type="button" class="btn secondary" id="v9-cache-download">Baixar minha versão local</button>'
+      +'<button type="button" class="btn" id="v9-cache-use-remote">Usar versão da nuvem e guardar backup local</button></div>'
+      +'<p id="v9-cache-feedback" aria-live="polite">Você pode fechar esta página sem perder o progresso.</p>'
+      +'<p><a href="./">Voltar à minha conta</a></p></section>';
+     const feedback=document.getElementById('v9-cache-feedback');
+     document.getElementById('v9-cache-download').addEventListener('click',()=>{
+      const blob=new Blob([decision.localRaw],{type:'application/json;charset=utf-8'});
+      const address=URL.createObjectURL(blob);
+      const anchor=document.createElement('a');anchor.href=address;
+      anchor.download='VYZO_ACADEMY_V9_COPIA_LOCAL.json';anchor.click();
+      setTimeout(()=>URL.revokeObjectURL(address),1000);
+      feedback.textContent='Cópia local preparada para download. Confira os downloads do navegador.';
+     });
+     await new Promise(resolve=>{
+      const button=document.getElementById('v9-cache-use-remote');
+      button.addEventListener('click',()=>{button.disabled=true;resolve();},{once:true});
+     });
+     const fresh=await client.auth.getUser();
+     if(fresh.error||fresh.data?.user?.id!==user.id||!isVerifiedStudent(fresh.data?.user))
+      throw Error('A sessão mudou; nenhuma versão foi substituída.');
+    }
     try{
-     const cached=localStorage.getItem(scopedKey);
-     if(cached&&cached!==JSON.stringify(p))
-      localStorage.setItem(scopedKey+'-backup-'+Date.now(),cached);
-     localStorage.setItem(scopedKey,JSON.stringify(p));
-    }catch{throw Error('Não foi possível proteger o cache deste usuário. Exporte o backup local antes de continuar.');}
+     adoptCloudCache(localStorage,scopedKey,decision,crypto.randomUUID());
+    }catch{
+     throw Error('Não foi possível preservar o backup e preparar sua versão da nuvem. O cache original continua intacto.');
+    }
    }
    const status=document.querySelector('.v9-guest-label');
    const note=document.querySelector('.v9-notice');
