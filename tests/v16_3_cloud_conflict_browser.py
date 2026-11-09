@@ -50,9 +50,7 @@ with sync_playwright() as p:
  browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
  try:
   context=browser.new_context(accept_downloads=True)
-  context.add_init_script(script="""(key,record)=>{
-    if(location.hostname==='127.0.0.1')localStorage.setItem(key,JSON.stringify(record));
-  }""".replace('(key,record)',f'({json.dumps(KEY)},{json.dumps(LOCAL)})'))
+  context.add_init_script(script=f"""if(location.hostname==='127.0.0.1')localStorage.setItem({json.dumps(KEY)},JSON.stringify({json.dumps(LOCAL)}));""")
   setup(context,True)
   page=context.new_page()
   problems=[]
