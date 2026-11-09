@@ -25,6 +25,51 @@ OFFICIAL_HOSTS = (
 class InvalidDocument(ValueError):
     pass
 
+# Pistas editoriais: padrões de linha, não interpretação semântica nem validação.
+# O trecho registrado é sempre uma substring exata do texto da página.
+EVIDENCE_LABELS = (
+    ("retificacao", re.compile(r"\bretifica(?:ção|cao|ções|coes)\b", re.IGNORECASE)),
+    ("edital_identificacao", re.compile(r"\b(?:edital\s+(?:n[º°.o]*|numero|número)?\s*\d+)", re.IGNORECASE)),
+    ("data_prova", re.compile(r"\b(?:data\s+(?:da|de)\s+prova|provas?\s+(?:ser[aã]o|ocorrer[aã]o))\b", re.IGNORECASE)),
+    ("disciplinas", re.compile(r"\b(?:conte[uú]do\s+program[aá]tico|disciplinas?\s+exigidas?|conhecimentos\s+espec[ií]ficos)\b", re.IGNORECASE)),
+    ("banca", re.compile(r"\b(?:banca\s+organizadora|institui[cç][aã]o\s+organizadora)\b", re.IGNORECASE)),
+    ("cargo_curso", re.compile(r"\b(?:cargos?\s+(?:ofertados?|dispon[ií]veis)|curso\s+de\s+gradua[cç][aã]o)\b", re.IGNORECASE)),
+)
+MAX_REVIEW_ITEMS = 48
+MAX_EVIDENCE_LINE = 450
+
+
+def evidence_candidates(pages: list[dict], truncated: bool) -> list[dict]:
+    """Pistas literalizadas. Nunca transformar indicação de edital em fato aprovado."""
+    findings = []
+    for page in pages:
+        number = page["pagina"]
+        for line_number, raw_line in enumerate(page["texto"].splitlines(), 1):
+            literal = raw_line.strip()
+            if len(literal) < 5:
+                continue
+            for label, pattern in EVIDENCE_LABELS:
+                match = pattern.search(literal)
+                if match and len(findings) < MAX_REVIEW_ITEMS:
+                    excerpt = literal[:MAX_EVIDENCE_LINE]
+                    if match.start() >= MAX_EVIDENCE_LINE:
+                        continue
+                    findings.append({
+                        "tipo": label,
+                        "pagina": number,
+                        "linha_texto_extraido": line_number,
+                        "trecho_literal": excerpt,
+                        "estado_revisao": "pendente",
+                        "interpretação_confirmada": False,
+                        "confianca_automaticamente_atribuida": None,
+                    })
+                    break
+            if len(findings) == MAX_REVIEW_ITEMS:
+                return findings
+    return findings
+
+
+
 
 def institutional_source(url: str) -> str:
     if not isinstance(url, str) or len(url) > 1600 or not url:
@@ -103,11 +148,14 @@ def ingest(pdf_path: Path, source_url: str) -> dict:
             "paginas_sem_texto": no_text,
             "texto_truncado": truncated,
             "paginas": pages,
+            "pistas_para_revisao": evidence_candidates(pages, truncated),
+            "pistas_sem_validacao": True,
             "avisos": [
                 "A URL é apenas uma origem institucional informada; sua relação com o PDF não foi verificada.",
                 "Texto extraído pode perder colunas, tabelas, anexos ou caracteres; revisão editorial obrigatória.",
                 "Páginas sem texto podem ser digitalizadas. OCR não foi executado.",
-                "Datas, cargos, disciplinas e exigências NÃO foram interpretados nem validados automaticamente."
+                "Datas, cargos, disciplinas e exigências NÃO foram interpretados nem validados automaticamente.",
+                "Pistas são linhas literais para revisão editorial; não significam requisitos identificados ou aprovados."
             ]
         }
     except InvalidDocument:

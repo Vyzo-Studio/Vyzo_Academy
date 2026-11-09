@@ -36,6 +36,31 @@ class NoticeTests(unittest.TestCase):
         self.assertEqual(result["paginas_sem_texto"], 0)
         self.assertFalse(result["texto_truncado"])
 
+    def test_literal_page_references_remain_unverified(self):
+        result = ingest(self.path, "https://www.gov.br/inep/edital-exemplo.pdf")
+        self.assertTrue(result["pistas_sem_validacao"])
+        self.assertEqual(result["pistas_para_revisao"], [])
+        self.assertFalse(result["conteudo_oficial_homologado"])
+
+    def test_bounded_review_candidates_quote_exact_lines(self):
+        from ingest_exam_pdf import evidence_candidates, MAX_REVIEW_ITEMS
+        pages = [
+            {"pagina": 1, "texto": "EDITAL Nº 12/2026\nBanca organizadora: exemplo imaginário\nData da prova: 20/12/2026"},
+            {"pagina": 2, "texto": "Conteúdo programático: Língua Portuguesa\nRetificação do edital nº 12/2026"}
+        ]
+        clues = evidence_candidates(pages, False)
+        self.assertEqual([v["tipo"] for v in clues],
+                         ["edital_identificacao", "banca", "data_prova", "disciplinas", "retificacao"])
+        for item in clues:
+            lines = pages[item["pagina"] - 1]["texto"].splitlines()
+            self.assertIn(item["trecho_literal"], lines[item["linha_texto_extraido"] - 1])
+            self.assertEqual(item["estado_revisao"], "pendente")
+            self.assertFalse(item["interpretação_confirmada"])
+            self.assertIsNone(item["confianca_automaticamente_atribuida"])
+        excessive = [{"pagina": 1, "texto": ("Data da prova: exemplo\n" * 150)}]
+        self.assertEqual(len(evidence_candidates(excessive, False)), MAX_REVIEW_ITEMS)
+        self.assertEqual(evidence_candidates([{"pagina": 1, "texto": "texto sem referência"}], False), [])
+
     def test_no_auto_verification_on_institutional_looking_url(self):
         for url in (
             "http://www.gov.br/inep",
