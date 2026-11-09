@@ -207,6 +207,14 @@ Observação: “implementado” significa código na branch; serviço externo n
 - Testes de unidade `tests/v16_3_enem_day.test.mjs` verificam 90 itens únicos, áreas 45/45, idioma escolhido, prazo, pontuação com questões em branco neutras e insuficiência de cobertura. `tests/v16_3_enem_day_browser.py` valida seleção/expiração em Chromium com armazenamento simulado. Testes de browser **não comprovam backend de Auth, nem correção de redação real**.
 - Dependência da futura experiência integral: redação validada, cinco itens de língua estrangeira por modalidade, curadoria do banco e testes E2E de redação + prova em conjunto.
 
+## V16.3 — Lote C3.1: pistas estruturadas para revisão de editais PDF
+
+- O parser local `scripts/ingest_exam_pdf.py`, já integrado pelo PR #33, agora inclui `pistas_para_revisao` no **mesmo** JSON extraído, sem serviço duplicado, IA, rede ou cobrança.
+- Pistas são apenas linhas **literais e conferíveis por página** do PDF, relacionadas a identificação de edital, retificação, data da prova, conteúdo programático, banca ou cargos/cursos. Cada ocorrência recebe página, número de linha do texto extraído, trecho exato e `estado_revisao:pendente`; os fatos não são interpretados/confirmados.
+- Limites adicionais: 48 ocorrências por extração e 450 caracteres por trecho. O campo `origem_confirmada` continua `false`, e nenhum texto é publicado, promovido a requisito de prova ou executado como comando.
+- O teste `tests/v16_2_pdf_ingest_test.py` cobre linha literal existente, referências de página, recusa de homologação automática, limite de ocorrências, PDF inválido e origem potencialmente falsa.
+- **Pendente:** conferência humana do PDF/retificações, OCR seguro, tabelas, aprovação editorial, controle de versão de edital e vinculação de programas realmente validados às metas.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
