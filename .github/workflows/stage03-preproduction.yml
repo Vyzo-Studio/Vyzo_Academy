@@ -23,6 +23,7 @@ jobs:
           node --check academy/v9-cloud-gate.mjs
           node --check academy/v9-cloud-recovery.mjs
           node tests/v16_3_cloud_recovery.test.mjs
+          node tests/v16_3_adult_rls_contract.test.mjs
           node --check academy/v9.mjs
           node tests/stage03_auth.test.mjs
       - name: Verify retained V9 and exam logic
