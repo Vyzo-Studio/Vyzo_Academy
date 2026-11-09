@@ -28,8 +28,8 @@ class InvalidDocument(ValueError):
 # Pistas editoriais: padrões de linha, não interpretação semântica nem validação.
 # O trecho registrado é sempre uma substring exata do texto da página.
 EVIDENCE_LABELS = (
-    ("edital_identificacao", re.compile(r"\b(?:edital\s+(?:n[º°.o]*|numero|número)?\s*\d+)", re.IGNORECASE)),
     ("retificacao", re.compile(r"\bretifica(?:ção|cao|ções|coes)\b", re.IGNORECASE)),
+    ("edital_identificacao", re.compile(r"\b(?:edital\s+(?:n[º°.o]*|numero|número)?\s*\d+)", re.IGNORECASE)),
     ("data_prova", re.compile(r"\b(?:data\s+(?:da|de)\s+prova|provas?\s+(?:ser[aã]o|ocorrer[aã]o))\b", re.IGNORECASE)),
     ("disciplinas", re.compile(r"\b(?:conte[uú]do\s+program[aá]tico|disciplinas?\s+exigidas?|conhecimentos\s+espec[ií]ficos)\b", re.IGNORECASE)),
     ("banca", re.compile(r"\b(?:banca\s+organizadora|institui[cç][aã]o\s+organizadora)\b", re.IGNORECASE)),
