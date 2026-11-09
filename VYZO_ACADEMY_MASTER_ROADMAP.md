@@ -198,6 +198,15 @@ Observação: “implementado” significa código na branch; serviço externo n
 - A `main` após #34 é `8f4d1ca662365d9e7cffca93d73d56cfbfd6ec7c`; histórico original dos estudantes mantido. CI do PR #34 aprovado e GitHub Pages pós-merge aprovado. Testes com provedores de IA e dois usuários Auth reais **não realizados**.
 - Os 36 módulos seguem **não concluídos como plataforma universal**. O módulo 13 avança de não implementado para **parcial** apenas devido à fundação offline de extração de PDF; não é portal de editais real ou auto-homologado.
 
+## V16.3 — Lote E1: treino autoral de 90 questões por dia do ENEM (09/11/2026)
+
+- A opção `day1` utiliza **45 Linguagens + 45 Humanas**, prazo fixo contínuo de **330 minutos**; `day2` utiliza **45 Natureza + 45 Matemática**, prazo fixo de **300 minutos**, seguindo a distribuição de áreas e duração regular descritas pelo Inep em 2026: https://www.gov.br/inep/pt-br/acesso-a-informacao/perguntas-frequentes/exame-nacional-do-ensino-medio-enem/no-dia-do-exame-orientacoes/em-que-horario-serao-aplicadas
+- Integra o compositor validado existente `composeExam` e os cronômetros V14 à jornada V9; o seletor de tamanho não substitui os 90 itens em modo de dia. O fluxo completo inclui salvamento local, questões marcadas, retomada e correção já existentes.
+- **Não equivale à prova oficial completa:** o primeiro dia ainda não integra redação; o banco autoral oferece somente **dois itens por língua estrangeira**, portanto a distribuição específica de idioma não replica as cinco questões oficiais; sem TRI. A interface avisa antes de iniciar e na correção.
+- Não concede o status `SIMULADO ENEM 1º DIA OFICIAL COMPLETO`; permanece como **treino autoral das 90 questões**. Não usa novos conteúdos falsamente atribuídos ao Inep.
+- Testes de unidade `tests/v16_3_enem_day.test.mjs` verificam 90 itens únicos, áreas 45/45, idioma escolhido, prazo, pontuação com questões em branco neutras e insuficiência de cobertura. `tests/v16_3_enem_day_browser.py` valida seleção/expiração em Chromium com armazenamento simulado. Testes de browser **não comprovam backend de Auth, nem correção de redação real**.
+- Dependência da futura experiência integral: redação validada, cinco itens de língua estrangeira por modalidade, curadoria do banco e testes E2E de redação + prova em conjunto.
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
