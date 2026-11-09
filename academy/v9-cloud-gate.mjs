@@ -67,7 +67,8 @@ else{
    let pending=null,running=false,blocked=false;
    async function send(snapshot){
     const verified=await client.auth.getUser();
-    if(verified.error||verified.data?.user?.id!==user.id)throw Error('A conta ativa mudou. Sincronização interrompida.');
+    if(verified.error||verified.data?.user?.id!==user.id||!isVerifiedStudent(verified.data?.user))
+     throw Error('A conta ou sua autorização mudou. Sincronização interrompida.');
     if(!version){
      const {error}=await client.from('academy_private_records').insert({
       user_id:user.id,record_key:'v9_current_state',payload:snapshot,revision:1
@@ -104,7 +105,8 @@ else{
    });
    window.addEventListener('online',()=>void flush());
    client.auth.onAuthStateChange((event,session)=>{
-    if(event==='SIGNED_OUT'||event==='SIGNED_IN'&&session?.user?.id!==user.id){
+    if(event==='SIGNED_OUT'||event==='SIGNED_IN'&&session?.user?.id!==user.id||
+      ['SIGNED_IN','TOKEN_REFRESHED','USER_UPDATED'].includes(event)&&session?.user&&!isVerifiedStudent(session.user)){
      window.VYZO_V9_CLOUD=null;
      if(view)view.replaceChildren();
      location.replace('./?auth=login');
