@@ -82,6 +82,16 @@ def suite():
    assert not errors,errors
    page.close()
   page=browser.new_page(viewport={'width':390,'height':844})
+  # O teste assume que tarefas recém-geradas aparecem ao avançar uma semana.
+  # Congelar a data da fixture evita falhas conforme o calendário real avança.
+  page.evaluate("""() => {
+    const NativeDate=Date,reference=NativeDate.parse('2026-11-07T12:00:00Z');
+    class FixedDate extends NativeDate {
+      constructor(...args){super(...(args.length?args:[reference]));}
+      static now(){return reference;}
+    }
+    window.Date=FixedDate;
+  }""")
   errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.set_content(build_html(mock=True),wait_until='load')
   expect(page.get_by_text('Vamos preparar seus estudos')).to_be_visible(timeout=3000)
