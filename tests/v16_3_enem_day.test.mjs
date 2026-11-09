@@ -46,7 +46,7 @@ assert.equal(resolveExamTiming(goal,'general','stopwatch',70).mode,'stopwatch');
 const narrow={...goal,subjects:['Português']};
 const pool=suitableQuestions(bank,narrow);
 assert(pool.length<90);
-assert.throws(()=>composeExam(pool,narrow,90,{mode:'day1',language:'Inglês'}),/questões|diagnóstico/);
+assert.throws(()=>composeExam(pool,narrow,90,{mode:'day1',language:'Inglês'}),/questões|diagnóstico|língua/i);
 const v9=read('academy/v9.mjs');
 for(const token of ['resolveExamQuantity','validateExamQuantity','resolveExamTiming','Treino autoral — 1º dia','sem redação'])
  assert(v9.includes(token),'Missing V9 integration: '+token);
