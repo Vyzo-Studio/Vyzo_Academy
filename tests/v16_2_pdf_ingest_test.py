@@ -45,8 +45,8 @@ class NoticeTests(unittest.TestCase):
     def test_bounded_review_candidates_quote_exact_lines(self):
         from ingest_exam_pdf import evidence_candidates, MAX_REVIEW_ITEMS
         pages = [
-            {"pagina": 1, "texto": "EDITAL Nº 12/2026\\nBanca organizadora: exemplo imaginário\\nData da prova: 20/12/2026"},
-            {"pagina": 2, "texto": "Conteúdo programático: Língua Portuguesa\\nRetificação do edital nº 12/2026"}
+            {"pagina": 1, "texto": "EDITAL Nº 12/2026\nBanca organizadora: exemplo imaginário\nData da prova: 20/12/2026"},
+            {"pagina": 2, "texto": "Conteúdo programático: Língua Portuguesa\nRetificação do edital nº 12/2026"}
         ]
         clues = evidence_candidates(pages, False)
         self.assertEqual([v["tipo"] for v in clues],
@@ -57,7 +57,7 @@ class NoticeTests(unittest.TestCase):
             self.assertEqual(item["estado_revisao"], "pendente")
             self.assertFalse(item["interpretação_confirmada"])
             self.assertIsNone(item["confianca_automaticamente_atribuida"])
-        excessive = [{"pagina": 1, "texto": ("Data da prova: exemplo\\n" * 150)}]
+        excessive = [{"pagina": 1, "texto": ("Data da prova: exemplo\n" * 150)}]
         self.assertEqual(len(evidence_candidates(excessive, False)), MAX_REVIEW_ITEMS)
         self.assertEqual(evidence_candidates([{"pagina": 1, "texto": "texto sem referência"}], False), [])
 
