@@ -33,7 +33,7 @@ else{
       +'<p>Há progresso salvo neste navegador que é diferente da sua versão na nuvem. '
       +'Nada será substituído automaticamente. Baixe uma cópia local antes de escolher a versão da nuvem.</p>'
       +'<div class="v9-actions"><button type="button" class="btn secondary" id="v9-cache-download">Baixar minha versão local</button>'
-      +'<button type="button" class="btn" id="v9-cache-use-remote">Usar versão da nuvem e guardar backup local</button></div>'
+      +'<button type="button" class="btn" id="v9-cache-use-remote" disabled>Usar versão da nuvem e guardar backup local</button></div>'
       +'<p id="v9-cache-feedback" aria-live="polite">Você pode fechar esta página sem perder o progresso.</p>'
       +'<p><a href="./">Voltar à minha conta</a></p></section>';
      const feedback=document.getElementById('v9-cache-feedback');
@@ -43,7 +43,8 @@ else{
       const anchor=document.createElement('a');anchor.href=address;
       anchor.download='VYZO_ACADEMY_V9_COPIA_LOCAL.json';anchor.click();
       setTimeout(()=>URL.revokeObjectURL(address),1000);
-      feedback.textContent='Cópia local preparada para download. Confira os downloads do navegador.';
+      feedback.textContent='Cópia local preparada para download. Confira os downloads do navegador antes de continuar.';
+      document.getElementById('v9-cache-use-remote').disabled=false;
      });
      await new Promise(resolve=>{
       const button=document.getElementById('v9-cache-use-remote');
