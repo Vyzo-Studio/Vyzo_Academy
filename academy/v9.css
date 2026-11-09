@@ -121,3 +121,6 @@ body[data-theme=dark] .v11-figure{background:#ecf4ff;color:#1e375b}
 @media(prefers-reduced-motion:reduce){
  .v9-progress div{transition:none}
 }
+
+/* V16.3 — a semântica hidden prevalece sobre display:grid/flex das classes. */
+.v9-app [hidden]{display:none!important}
