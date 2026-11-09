@@ -12,7 +12,7 @@ const tables=[
 ];
 for(const table of tables)assert(sql.includes("'"+table+"'"),'Missing guard for '+table);
 assert.match(sql,/as restrictive for all to authenticated/i);
-assert.match(sql,/auth\.jwt\(\)->'app_metadata'->>'academy_adult_verified'/);
+assert.match(sql,/auth\.jwt\(\)->''app_metadata''->>''academy_adult_verified''/);
 assert.doesNotMatch(sql,/auth\.jwt\(\)->'user_metadata'/);
 assert.match(test,/request\.jwt\.claims/);
 assert.match(test,/set local role authenticated/i);
