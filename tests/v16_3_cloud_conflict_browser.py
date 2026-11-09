@@ -14,13 +14,14 @@ LOCAL={'schema':9,'revision':8,'onboarding':False,'goals':[{'id':'local-goal'}],
 REMOTE={'schema':9,'revision':4,'onboarding':False,'goals':[{'id':'remote-goal'}],
         'assessments':[],'tasks':[],'profile':{'minutes':120}}
 CONFIG="window.VYZO_ACADEMY_CLOUD={url:'https://cfrlqinzsysoqcduqftd.supabase.co',publishableKey:'sb_publishable_test_only',registrationEnabled:false};"
-def mock_backend(approved=True):
+def mock_backend(approved=True,revoke_on_second=False):
  user={'id':ACCOUNT,'email':'test-adult@example.invalid','email_confirmed_at':'2026-11-09T10:00:00Z',
        'is_anonymous':False,'app_metadata':{'academy_adult_verified':approved}}
- return "export function createClient(){const user="+json.dumps(user)+",remote="+json.dumps(REMOTE)+""";
+ return "export function createClient(){const user="+json.dumps(user)+",remote="+json.dumps(REMOTE)+",revoke="+json.dumps(revoke_on_second)+""";
+  let checked=0;
   return {
    auth:{
-    getUser:async()=>({data:{user},error:null}),
+    getUser:async()=>({data:{user:++checked>1&&revoke?{...user,app_metadata:{academy_adult_verified:false}}:user},error:null}),
     onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})
    },
    from:()=>({
@@ -38,12 +39,12 @@ thread=Thread(target=httpd.serve_forever,daemon=True)
 thread.start()
 site=f'http://127.0.0.1:{httpd.server_address[1]}/academy/v9-cloud.html'
 
-def setup(context,approved):
+def setup(context,approved,revoke_on_second=False):
  context.route('**/academy/config.js',lambda route:route.fulfill(
   status=200,content_type='text/javascript',body=CONFIG))
  context.route('**/npm/@supabase/supabase-js@2.119.0/+esm',
   lambda route:route.fulfill(status=200,content_type='text/javascript',
-    headers={'Access-Control-Allow-Origin':'*'},body=mock_backend(approved)))
+    headers={'Access-Control-Allow-Origin':'*'},body=mock_backend(approved,revoke_on_second)))
  context.route('https://cfrlqinzsysoqcduqftd.supabase.co/**',lambda route:route.abort())
 
 with sync_playwright() as p:
@@ -85,7 +86,22 @@ with sync_playwright() as p:
   assert json.loads(page.evaluate('(key)=>localStorage.getItem(key)',KEY))==LOCAL
   assert page.evaluate('window.VYZO_V9_CLOUD===undefined')
   context2.close()
+
+  # Aprovação retirada entre abertura e decisão: nenhuma versão é substituída.
+  context3=browser.new_context(accept_downloads=True)
+  context3.add_init_script(script=f"""if(location.hostname==='127.0.0.1')localStorage.setItem({json.dumps(KEY)},JSON.stringify({json.dumps(LOCAL)}));""")
+  setup(context3,True,True)
+  page=context3.new_page()
+  page.goto(site,wait_until='load')
+  expect(page.get_by_role('heading',name='Duas versões da sua jornada')).to_be_visible(timeout=10000)
+  with page.expect_download():
+   page.locator('#v9-cache-download').click()
+  page.locator('#v9-cache-use-remote').click()
+  expect(page.get_by_text('Não foi possível verificar sua sessão ou carregar a jornada',exact=False)).to_be_visible(timeout=10000)
+  assert json.loads(page.evaluate('(key)=>localStorage.getItem(key)',KEY))==LOCAL
+  assert not page.evaluate('(key)=>Object.keys(localStorage).some(k=>k.startsWith(key+"-backup-"))',KEY)
+  context3.close()
  finally:
   browser.close()
   httpd.shutdown()
-print('PASS V16.3 Auth mock Chromium: conflict requires explicit download, original archived, remote applied and unapproved adult denied.')
+print('PASS V16.3 Auth mock Chromium: conflict requires explicit download, original archived, remote applied and unapproved/revoked adult denied without modifying cache.')
