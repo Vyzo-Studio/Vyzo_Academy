@@ -23,6 +23,10 @@ jobs:
         run: node tests/v16_release_security_gate.test.mjs
       - name: V16 pedagogical arithmetic and bundle evidence
         run: node tests/v16_quantitative_bank.test.mjs
+      - name: V16.3 ENEM authorial day 90-item composition and timing
+        run: |
+          node --check academy/v16-enem-day.mjs
+          node tests/v16_3_enem_day.test.mjs
       - name: V16.2 Foreign language ENEM question presentation
         run: node tests/v16_2_foreign_language_enem.test.mjs
       - name: V16 expanded quantitative content checks
