@@ -14,6 +14,18 @@ Cinco lotes adicionais possuem evidências documentadas em [V16_2_EXECUTION_CHEC
 
 **A avaliação geral permanece NÃO APROVADA PARA LANÇAMENTO UNIVERSAL.**
 
+## Atualização operacional V16.3 — 09/11/2026
+
+Evidências e limites: [checkpoint V16.3](./V16_3_EXECUTION_CHECKPOINT.md).
+
+- **Simulados locais:** treino autoral de 90 questões por dia integrado à `main` no PR #36, com 45+45 áreas, 330/300 minutos, resultados e preservação de brancos. Não equivale ao primeiro dia oficial completo: sem redação conjunta e sem cinco itens oficiais de língua estrangeira. Sem TRI. A curadoria humana integral segue pendente.
+- **Editais:** PR #37 integrou pistas editoriais literais por página e linha no PDF local, sem verificar automaticamente origem, edição, retificações ou requisitos. Nunca promover a conteúdo oficial antes de revisão.
+- **Privacidade:** PR #29 em draft acrescentou prevenção de conflito de cache e uma **proposta não aplicada** de RLS restritiva para 16 tabelas, testada no banco real com rollback; as policies ativas de titularidade ainda não incluem este guard de aprovação adulta. Real Auth HTTP permanece não homologado.
+- **IA e redação:** PR #30 permanece draft, gate de cadastro fechado, sem autorização de provedor; corretor B1 e cadeia #12/#13/#16/#18 não operacionais.
+- **Recuperação:** só há ensaio de recuperação lógica e rollback no banco; backup integral, Storage/Auth offsite e restore isolado não comprovados.
+
+**Decisão:** operação estática local pode continuar conforme gates existentes; lançamento universal autenticado, proteção de menores e IA continuam **NÃO APROVADOS**.
+
 ## Matriz de liberação
 
 | Requisito | Evidência verificada | Status |

@@ -215,6 +215,13 @@ Observação: “implementado” significa código na branch; serviço externo n
 - O teste `tests/v16_2_pdf_ingest_test.py` cobre linha literal existente, referências de página, recusa de homologação automática, limite de ocorrências, PDF inválido e origem potencialmente falsa.
 - **Pendente:** conferência humana do PDF/retificações, OCR seguro, tabelas, aprovação editorial, controle de versão de edital e vinculação de programas realmente validados às metas.
 
+## V16.3 — Integração funcional e checkpoints de novembro de 2026
+
+- **Lote A — Auth segura (draft #29):** conflito entre cache V9 e nuvem exige download/decisão explícita; progresso anterior arquivado antes de importar remoto. Revogação de autorização no cliente interrompe novas gravações, sem alegar proteção se JWT ainda estiver válido. Preview RLS de 16 tabelas testado apenas com rollback no banco dedicado; produção ainda não contém a política restritiva de adulto aprovado.
+- **Lote E — ENEM autoral (integrado #36):** primeiro e segundo dias agora possuem treino de 90 questões, áreas 45+45, prazos de 330/300 minutos e expiração/correção, preservando IDs e histórico. Não atende o primeiro dia integral oficial sem redação; tampouco possui cinco itens por idioma ou TRI. Testes em Chromium e checks do PR passaram.
+- **Lote C — Editais PDF (integrado #37):** `ingest_exam_pdf.py` produz pistas literais auditáveis por página/linha. Revisão e autenticidade sempre pendentes. Testes corrigidos e aprovados.
+- Todos os detalhes, evidências e bloqueios estão em [V16_3_EXECUTION_CHECKPOINT.md](./V16_3_EXECUTION_CHECKPOINT.md). **A matriz de 36 módulos continua parcial; nenhuma conta real ou IA paga foi ativada nesta execução.**
+
 ## Diferenças, sobreposições e conflitos
 
 1. **Três jornadas coexistem:** simulador clássico (`src/app.js`, chave `enem-intelligence-v2`), V9 local (`academy/v9.mjs`, `schema:9`) e V8 cloud (`academy/app.mjs`, não configurado na `main`). Todas possuem objetivos/provas ou redações, mas **não são um banco compartilhado**. Evitar unificação sem plano de migração e fallback.
